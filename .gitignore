@@ -1,0 +1,23 @@
+# Dependencies
+frontend/node_modules/
+
+# Build
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Internal
+.claude_data/
+.appgenius_temp/
+.vq5zdfpxxxni
+.vqr10ii2aeq47
+
+# Env
+.env
+.env.*

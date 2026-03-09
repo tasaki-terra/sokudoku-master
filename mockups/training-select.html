@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速読マスター - トレーニング選択</title>
+    
+    <!-- Material UI CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            min-height: 100vh;
+        }
+        
+        /* ヘッダー */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .back-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        .user-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* メインコンテンツ */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        /* 難易度選択 */
+        .difficulty-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .difficulty-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .difficulty-levels {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .level-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .level-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .level-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* トレーニングカード */
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .training-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .training-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card-header {
+            padding: 20px;
+            color: white;
+            position: relative;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .training-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .training-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .training-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .training-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .training-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .training-6 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        
+        .training-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .training-name {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .training-type {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .training-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .training-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 500;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 3px;
+        }
+        
+        .best-score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .locked-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .locked-overlay i {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="back-section">
+                <button class="back-btn" onclick="location.href='/home'">
+                    <i class="material-icons">arrow_back</i>
+                </button>
+                <h1 class="page-title">トレーニング選択</h1>
+            </div>
+            <div class="user-stats">
+                <div class="stat-badge">
+                    <i class="material-icons">star</i>
+                    <span>レベル 5</span>
+                </div>
+                <div class="stat-badge">
+                    <i class="material-icons">local_fire_department</i>
+                    <span>7日連続</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-container">
+        <!-- 難易度選択 -->
+        <div class="difficulty-selector">
+            <h2 class="difficulty-title">
+                <i class="material-icons">tune</i>
+                難易度を選択
+            </h2>
+            <div class="difficulty-levels">
+                <button class="level-btn" data-level="1">
+                    <i class="material-icons">star_border</i>
+                    レベル1（2秒）
+                </button>
+                <button class="level-btn active" data-level="2">
+                    <i class="material-icons">star_border</i>
+                    レベル2（1秒）
+                </button>
+                <button class="level-btn" data-level="3">
+                    <i class="material-icons">star_half</i>
+                    レベル3（0.5秒）
+                </button>
+                <button class="level-btn" data-level="4">
+                    <i class="material-icons">star</i>
+                    レベル4（0.25秒）
+                </button>
+                <button class="level-btn" data-level="5">
+                    <i class="material-icons">stars</i>
+                    レベル5（0.1秒）
+                </button>
+                <button class="level-btn" data-level="6">
+                    <i class="material-icons">auto_awesome</i>
+                    レベル6（同時表示）
+                </button>
+            </div>
+        </div>
+        
+        <!-- トレーニングカード -->
+        <div class="training-grid">
+            <!-- FT1表: 水平移動トレーニング -->
+            <div class="training-card" onclick="startTraining('horizontal')">
+                <div class="card-header training-1">
+                    <i class="material-icons training-icon">swap_horiz</i>
+                    <div class="training-name">FT1表 水平移動</div>
+                    <div class="training-type">5行の左右移動</div>
+                    <div class="best-score">最高: 95点</div>
+                </div>
+                <div class="card-body">
+                    <p class="training-description">
+                        5行の水平線で左から右への視線移動を訓練。本を読むときの基本的な横の動きを鍛えます。
+                    </p>
+                    <div class="training-stats">
+                        <div class="stat">
+                            <div class="stat-value">42</div>
+                            <div class="stat-label">実施回数</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">85%</div>
+                            <div class="stat-label">平均正答率</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">+15</div>
+                            <div class="stat-label">今週の成長</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FT2表: 垂直移動トレーニング -->
+            <div class="training-card" onclick="startTraining('vertical')">
+                <div class="card-header training-2">
+                    <i class="material-icons training-icon">swap_vert</i>
+                    <div class="training-name">FT2表 垂直移動</div>
+                    <div class="training-type">5列の上下移動</div>
+                    <div class="best-score">最高: 88点</div>
+                </div>
+                <div class="card-body">
+                    <p class="training-description">
+                        5列の縦線で上から下への視線移動を訓練。縦書きの文章や表を読む力を鍛えます。
+                    </p>
+                    <div class="training-stats">
+                        <div class="stat">
+                            <div class="stat-value">38</div>
+                            <div class="stat-label">実施回数</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">82%</div>
+                            <div class="stat-label">平均正答率</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">+12</div>
+                            <div class="stat-label">今週の成長</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FT1裏: 斜め移動トレーニング -->
+            <div class="training-card" onclick="startTraining('diagonal')">
+                <div class="card-header training-3">
+                    <i class="material-icons training-icon">close</i>
+                    <div class="training-name">FT1裏 斜め移動</div>
+                    <div class="training-type">X字パターン＋縦</div>
+                    <div class="best-score">最高: 78点</div>
+                </div>
+                <div class="card-body">
+                    <p class="training-description">
+                        X字の対角線パターンに縦の動きを加えた応用訓練。立体的な視線移動を鍛えます。
+                    </p>
+                    <div class="training-stats">
+                        <div class="stat">
+                            <div class="stat-value">25</div>
+                            <div class="stat-label">実施回数</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">75%</div>
+                            <div class="stat-label">平均正答率</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">+8</div>
+                            <div class="stat-label">今週の成長</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FT2裏: 複合移動トレーニング -->
+            <div class="training-card" onclick="startTraining('complex')">
+                <div class="card-header training-4">
+                    <i class="material-icons training-icon">timeline</i>
+                    <div class="training-name">FT2裏 複合移動</div>
+                    <div class="training-type">水平＋X字パターン</div>
+                    <div class="best-score">最高: 72点</div>
+                </div>
+                <div class="card-body">
+                    <p class="training-description">
+                        水平移動とX字パターンを組み合わせた高度な複合訓練。多様な読み取りパターンに対応。
+                    </p>
+                    <div class="training-stats">
+                        <div class="stat">
+                            <div class="stat-value">18</div>
+                            <div class="stat-label">実施回数</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">70%</div>
+                            <div class="stat-label">平均正答率</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">+5</div>
+                            <div class="stat-label">今週の成長</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 訓練手帳: 順番追跡トレーニング -->
+            <div class="training-card" onclick="startTraining('sequence')">
+                <div class="card-header training-5">
+                    <i class="material-icons training-icon">format_list_numbered</i>
+                    <div class="training-name">訓練手帳 順番追跡</div>
+                    <div class="training-type">1-8数字順追跡</div>
+                    <div class="best-score">最高: 92点</div>
+                </div>
+                <div class="card-body">
+                    <p class="training-description">
+                        1から8までの数字を順番に追跡する訓練。集中力と正確な視線移動を同時に鍛えます。
+                    </p>
+                    <div class="training-stats">
+                        <div class="stat">
+                            <div class="stat-value">35</div>
+                            <div class="stat-label">実施回数</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">88%</div>
+                            <div class="stat-label">平均正答率</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">+10</div>
+                            <div class="stat-label">今週の成長</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 基本訓練: 連続水平移動（ロック状態） -->
+            <div class="training-card" style="position: relative;">
+                <div class="card-header training-6">
+                    <i class="material-icons training-icon">view_module</i>
+                    <div class="training-name">基本訓練 連続水平</div>
+                    <div class="training-type">複数行高速読み</div>
+                </div>
+                <div class="card-body">
+                    <p class="training-description">
+                        複数行を連続で水平移動する上級訓練。実際の速読に最も近い形式のトレーニングです。
+                    </p>
+                    <div class="training-stats">
+                        <div class="stat">
+                            <div class="stat-value">-</div>
+                            <div class="stat-label">実施回数</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">-</div>
+                            <div class="stat-label">平均正答率</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">-</div>
+                            <div class="stat-label">今週の成長</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="locked-overlay">
+                    <div>
+                        <i class="material-icons">lock</i>
+                        レベル10で解放
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    
+    <script>
+        // 難易度選択
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const level = this.dataset.level;
+                M.toast({html: `難易度レベル${level}に設定しました`, classes: 'blue'});
+            });
+        });
+        
+        // トレーニング開始
+        function startTraining(type) {
+            const level = document.querySelector('.level-btn.active').dataset.level;
+            console.log(`Starting training: ${type} at level ${level}`);
+            
+            // アニメーション効果
+            event.currentTarget.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                window.location.href = `/training/${type}?level=${level}`;
+            }, 200);
+        }
+        
+        // ページロード時のアニメーション
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.training-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

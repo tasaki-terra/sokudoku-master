@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速読マスター - 新規登録</title>
+    
+    <!-- Material UI CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            color: #667eea;
+            cursor: pointer;
+        }
+        
+        .app-title {
+            font-size: 24px;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .app-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .account-type-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .account-type-card {
+            flex: 1;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .account-type-card.selected {
+            border-color: #667eea;
+            background: #f3f4ff;
+        }
+        
+        .account-type-card i {
+            font-size: 40px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .account-type-card h3 {
+            font-size: 16px;
+            margin: 5px 0;
+            color: #333;
+        }
+        
+        .account-type-card p {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .input-field {
+            margin-bottom: 15px;
+        }
+        
+        .input-field input {
+            font-size: 14px;
+        }
+        
+        .input-field label {
+            font-size: 14px;
+        }
+        
+        .register-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .parent-fields {
+            display: none;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .parent-fields.show {
+            display: block;
+        }
+        
+        .character-decoration {
+            position: fixed;
+            font-size: 30px;
+            opacity: 0.1;
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .char-1 { top: 10%; left: 10%; animation-delay: 0s; }
+        .char-2 { top: 10%; right: 10%; animation-delay: 1s; }
+        .char-3 { bottom: 10%; left: 10%; animation-delay: 2s; }
+        .char-4 { bottom: 10%; right: 10%; animation-delay: 3s; }
+    </style>
+</head>
+<body>
+    <!-- 背景装飾 -->
+    <div class="character-decoration char-1">📚</div>
+    <div class="character-decoration char-2">🏃</div>
+    <div class="character-decoration char-3">✨</div>
+    <div class="character-decoration char-4">🎯</div>
+    
+    <div class="register-container">
+        <div class="header-section">
+            <a href="/login" class="back-btn">
+                <i class="material-icons">arrow_back</i>
+            </a>
+            <h1 class="app-title">速読マスター新規登録</h1>
+            <p class="app-subtitle">アカウントを作成して始めよう！</p>
+        </div>
+        
+        <!-- アカウント種別選択 -->
+        <div class="account-type-selector">
+            <div class="account-type-card selected" data-type="child">
+                <i class="material-icons">child_care</i>
+                <h3>こども用</h3>
+                <p>速読トレーニングをする</p>
+            </div>
+            <div class="account-type-card" data-type="parent">
+                <i class="material-icons">supervisor_account</i>
+                <h3>保護者用</h3>
+                <p>お子様の学習を見守る</p>
+            </div>
+        </div>
+        
+        <form id="registerForm">
+            <!-- 基本情報 -->
+            <div class="input-field">
+                <i class="material-icons prefix">person</i>
+                <input type="text" id="userId" required pattern="[a-zA-Z0-9]{4,}" title="半角英数字4文字以上">
+                <label for="userId">ユーザーID（半角英数字）</label>
+            </div>
+            
+            <div class="input-field">
+                <i class="material-icons prefix">face</i>
+                <input type="text" id="userName" required>
+                <label for="userName">なまえ</label>
+            </div>
+            
+            <div class="input-field">
+                <i class="material-icons prefix">lock</i>
+                <input type="password" id="password" required minlength="4">
+                <label for="password">パスワード（4文字以上）</label>
+            </div>
+            
+            <div class="input-field">
+                <i class="material-icons prefix">lock_outline</i>
+                <input type="password" id="passwordConfirm" required>
+                <label for="passwordConfirm">パスワード（確認）</label>
+            </div>
+            
+            <!-- 保護者用追加フィールド -->
+            <div class="parent-fields" id="parentFields">
+                <h6 style="color: #666; margin-bottom: 15px;">保護者情報</h6>
+                <div class="input-field">
+                    <i class="material-icons prefix">email</i>
+                    <input type="email" id="parentEmail">
+                    <label for="parentEmail">メールアドレス</label>
+                </div>
+                <div class="input-field">
+                    <i class="material-icons prefix">phone</i>
+                    <input type="tel" id="parentPhone">
+                    <label for="parentPhone">電話番号（任意）</label>
+                </div>
+            </div>
+            
+            <button type="submit" class="register-btn waves-effect waves-light">
+                登録する
+            </button>
+        </form>
+        
+        <div class="login-link">
+            <p>すでにアカウントをお持ちの方は<br>
+            <a href="/login">ログインはこちら</a></p>
+        </div>
+    </div>
+    
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    
+    <script>
+        // Materialize初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            M.updateTextFields();
+        });
+        
+        // アカウント種別選択
+        document.querySelectorAll('.account-type-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // 選択状態の更新
+                document.querySelectorAll('.account-type-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // 保護者用フィールドの表示切り替え
+                const parentFields = document.getElementById('parentFields');
+                if (this.dataset.type === 'parent') {
+                    parentFields.classList.add('show');
+                    // 保護者用の場合はメールアドレス必須
+                    document.getElementById('parentEmail').setAttribute('required', '');
+                } else {
+                    parentFields.classList.remove('show');
+                    document.getElementById('parentEmail').removeAttribute('required');
+                }
+                M.updateTextFields();
+            });
+        });
+        
+        // 登録フォーム処理
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('passwordConfirm').value;
+            
+            if (password !== passwordConfirm) {
+                M.toast({html: 'パスワードが一致しません', classes: 'red'});
+                return;
+            }
+            
+            // 選択されたアカウント種別を取得
+            const accountType = document.querySelector('.account-type-card.selected').dataset.type;
+            
+            // デモ用の処理
+            M.toast({html: '登録処理中...', classes: 'blue'});
+            
+            setTimeout(() => {
+                M.toast({html: '登録が完了しました！', classes: 'green'});
+                setTimeout(() => {
+                    alert(`${accountType === 'child' ? 'こども' : '保護者'}アカウントを作成しました。ログイン画面へ移動します。`);
+                    window.location.href = '/login';
+                }, 1000);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

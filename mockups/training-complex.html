@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速読マスター - FT1表 複合移動トレーニング</title>
+    
+    <!-- Material UI CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            background: #e0f2e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* シンプルなヘッダー */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #000000;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        
+        .header-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .timer {
+            font-size: 20px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        
+        .exit-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            cursor: pointer;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .exit-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        /* メインコンテンツエリア */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 70px 20px 100px;
+        }
+        
+        /* トレーニングボード */
+        .training-board {
+            width: 100%;
+            max-width: 1200px;
+            height: 700px;
+            background: white;
+            border: 3px solid #2e7d32;
+            border-radius: 8px;
+            padding: 30px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 左右分割エリア */
+        .split-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 40px;
+        }
+        
+        /* P19 左側エリア */
+        .p19-area {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .p19-title {
+            position: absolute;
+            top: -20px;
+            right: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #000000;
+        }
+        
+        .p19-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 15px;
+            width: 100%;
+            height: 85%;
+            margin-top: 40px;
+        }
+        
+        /* P18 右側エリア */
+        .p18-area {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .p18-title {
+            position: absolute;
+            top: -20px;
+            right: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #000000;
+        }
+        
+        /* P18 列コンテナ */
+        .p18-columns {
+            display: flex;
+            width: 100%;
+            height: 90%;
+            margin-top: 30px;
+        }
+
+        .p18-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* P18 ○印 */
+        .p18-sym {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #2e7d32;
+            border-radius: 50%;
+            background: white;
+            opacity: 0.2;
+            flex-shrink: 0;
+        }
+
+        .p18-sym.p18-start,
+        .p18-sym.p18-end {
+            width: 40px;
+            height: 40px;
+            border-width: 3px;
+            opacity: 1;
+        }
+
+        /* P18 下向き矢印 */
+        .p18-arr {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .p18-arr::before {
+            content: '';
+            display: block;
+            width: 1px;
+            height: 6px;
+            background: #a5d6a7;
+        }
+
+        .p18-arr::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 5px solid #a5d6a7;
+        }
+
+        /* P18 曲線矢印（列遷移） */
+        .p18-curve {
+            position: absolute;
+            width: 55%;
+            height: 35px;
+            z-index: 2;
+        }
+
+        .p18-curve svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .p18-curve-bottom {
+            bottom: -5px;
+            left: -5%;
+        }
+
+        .p18-curve-top {
+            top: -5px;
+            right: -5%;
+        }
+
+        /* 記号（○印） */
+        .symbol {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #2e7d32;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: auto;
+        }
+        
+        /* P19の記号 - 通常時透明度 */
+        .p19-area .symbol {
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        
+        .p19-area .symbol.active {
+            opacity: 1;
+            border-width: 4px;
+        }
+        
+        /* 円の内部に配置する番号 */
+        .circle-number {
+            position: absolute;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333333;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* 垂直線とガイド線 */
+        .vertical-line {
+            position: absolute;
+            width: 2px;
+            height: calc(100% - 100px);
+            background: #a5d6a7;
+            border: none;
+            border-left: 2px dashed #a5d6a7;
+            top: 50px;
+        }
+        
+        /* P18の曲線矢印 */
+        .curved-arrow {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+        }
+        
+        .curved-arrow-top {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .curved-arrow-bottom {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .curved-arrow svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 各円の周辺の矢印 */
+        .circle-arrows {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+        }
+        
+        .circle-arrows svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 列間の点線 */
+        .column-separator {
+            position: absolute;
+            width: 1px;
+            height: calc(85% - 50px);
+            border-left: 2px dashed #000000;
+            top: 70px;
+        }
+        
+        /* 下部の確認ボタン */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        
+        .confirm-btn {
+            background: #000000;
+            color: white;
+            border: none;
+            padding: 15px 60px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .confirm-btn:hover {
+            background: #333333;
+            transform: translateY(-1px);
+        }
+        
+        .confirm-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 開始画面 */
+        .start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #fff9c4 0%, #c8e6c9 50%, #bbdefb 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .start-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-content {
+            text-align: center;
+            position: relative;
+        }
+
+        .start-characters {
+            font-size: 50px;
+            margin-bottom: 15px;
+            animation: bounce 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-12px); }
+        }
+
+        .start-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.08);
+        }
+
+        .start-instruction {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            background: rgba(255, 255, 255, 0.75);
+            padding: 15px 30px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .countdown {
+            font-size: 80px;
+            font-weight: bold;
+            color: #e53935;
+            margin: 10px 0;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.12);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .start-deco {
+            position: absolute;
+            font-size: 36px;
+            opacity: 0.5;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(10deg); }
+        }
+
+        .start-deco-1 { top: -60px; left: -80px; animation-delay: 0s; }
+        .start-deco-2 { top: -60px; right: -80px; animation-delay: 0.5s; }
+        .start-deco-3 { bottom: -60px; left: -80px; animation-delay: 1s; }
+        .start-deco-4 { bottom: -60px; right: -80px; animation-delay: 1.5s; }
+        
+        /* トレーニング情報 */
+        .training-info {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 14px;
+            color: #999999;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <button class="exit-btn" onclick="exitTraining()">終了</button>
+        <div class="header-title">FT1表 複合移動トレーニング（訓練手帳P18-19）</div>
+        <div class="timer" id="timer">03:00</div>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <div class="training-board" id="trainingBoard">
+            <div class="training-info" id="trainingInfo">
+                レベル2: 1秒間隔 / 複合パターン移動
+            </div>
+            
+            <div class="split-container">
+                <!-- P19 左側エリア -->
+                <div class="p19-area">
+                    <div class="p19-title">19</div>
+                    
+                    <!-- P19グリッド -->
+                    <div class="p19-grid" id="p19Grid">
+                        <!-- 動的に生成 -->
+                    </div>
+                    
+                    <!-- 垂直線 -->
+                    <div class="vertical-line" style="left: 25%;"></div>
+                    <div class="vertical-line" style="left: 50%;"></div>
+                    <div class="vertical-line" style="left: 75%;"></div>
+                </div>
+                
+                <!-- P18 右側エリア -->
+                <div class="p18-area">
+                    <div class="p18-title">18</div>
+
+                    <div class="p18-columns" id="p18Columns">
+                        <!-- col3: 左端（エンド） -->
+                        <div class="p18-column">
+                            <div class="p18-curve p18-curve-top">
+                                <svg viewBox="0 0 100 35" fill="none">
+                                    <path d="M95,32 Q82,27 72,19" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="70,17 76,15 75,21" fill="#2e7d32"/>
+                                    <path d="M62,15 Q50,11 38,8" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="36,7 41,5 41,11" fill="#2e7d32"/>
+                                    <path d="M28,6 Q16,4 6,3" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="4,3 9,0 9,6" fill="#2e7d32"/>
+                                </svg>
+                            </div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym p18-end"></div>
+                        </div>
+
+                        <!-- col2 -->
+                        <div class="p18-column">
+                            <div class="p18-curve p18-curve-top">
+                                <svg viewBox="0 0 100 35" fill="none">
+                                    <path d="M95,32 Q82,27 72,19" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="70,17 76,15 75,21" fill="#2e7d32"/>
+                                    <path d="M62,15 Q50,11 38,8" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="36,7 41,5 41,11" fill="#2e7d32"/>
+                                    <path d="M28,6 Q16,4 6,3" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="4,3 9,0 9,6" fill="#2e7d32"/>
+                                </svg>
+                            </div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-curve p18-curve-bottom">
+                                <svg viewBox="0 0 100 35" fill="none">
+                                    <path d="M95,3 Q82,8 72,16" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="70,18 76,14 75,20" fill="#2e7d32"/>
+                                    <path d="M62,20 Q50,24 38,27" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="36,28 41,24 41,30" fill="#2e7d32"/>
+                                    <path d="M28,29 Q16,31 6,32" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="4,32 9,29 9,35" fill="#2e7d32"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- col1 -->
+                        <div class="p18-column">
+                            <div class="p18-curve p18-curve-top">
+                                <svg viewBox="0 0 100 35" fill="none">
+                                    <path d="M95,32 Q82,27 72,19" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="70,17 76,15 75,21" fill="#2e7d32"/>
+                                    <path d="M62,15 Q50,11 38,8" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="36,7 41,5 41,11" fill="#2e7d32"/>
+                                    <path d="M28,6 Q16,4 6,3" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="4,3 9,0 9,6" fill="#2e7d32"/>
+                                </svg>
+                            </div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-curve p18-curve-bottom">
+                                <svg viewBox="0 0 100 35" fill="none">
+                                    <path d="M95,3 Q82,8 72,16" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="70,18 76,14 75,20" fill="#2e7d32"/>
+                                    <path d="M62,20 Q50,24 38,27" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="36,28 41,24 41,30" fill="#2e7d32"/>
+                                    <path d="M28,29 Q16,31 6,32" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="4,32 9,29 9,35" fill="#2e7d32"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- col0: 右端（スタート） -->
+                        <div class="p18-column">
+                            <div class="p18-sym p18-start"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-arr"></div>
+                            <div class="p18-sym"></div>
+                            <div class="p18-curve p18-curve-bottom">
+                                <svg viewBox="0 0 100 35" fill="none">
+                                    <path d="M95,3 Q82,8 72,16" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="70,18 76,14 75,20" fill="#2e7d32"/>
+                                    <path d="M62,20 Q50,24 38,27" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="36,28 41,24 41,30" fill="#2e7d32"/>
+                                    <path d="M28,29 Q16,31 6,32" stroke="#2e7d32" stroke-width="1.5"/>
+                                    <polygon points="4,32 9,29 9,35" fill="#2e7d32"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 列間の点線 -->
+                    <div class="column-separator" style="left: 25%;"></div>
+                    <div class="column-separator" style="left: 50%;"></div>
+                    <div class="column-separator" style="left: 75%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <!-- 開始画面 -->
+    <div class="start-overlay" id="startOverlay">
+        <div class="start-content">
+            <span class="start-deco start-deco-1">⭐</span>
+            <span class="start-deco start-deco-2">🌟</span>
+            <span class="start-deco start-deco-3">✨</span>
+            <span class="start-deco start-deco-4">💫</span>
+            <div class="start-characters">👀🔀🦁</div>
+            <h1 class="start-title">複合移動トレーニング</h1>
+            <p class="start-instruction">
+                濃くなっている○印を目で追いかけてね！
+            </p>
+            <div class="countdown" id="countdown"></div>
+        </div>
+    </div>
+    
+    <script>
+        // トレーニング設定
+        const trainingConfig = {
+            level: 2, // デフォルトレベル2（1秒間隔）
+            totalPositions: 8,
+            currentPosition: 0,
+            timeLeft: 180, // 3分
+            isRunning: false,
+            speed: 1000, // 1秒間隔
+            currentSide: 'p19' // 開始はP19側
+        };
+        
+        // P19の移動パターン（①→②→③→④→⑤→⑥→⑦→⑧の順）
+        // 各列の上端（①③⑤⑦）と下端（②④⑥⑧）のみ
+        const p19Pattern = [
+            { row: 0, col: 3 }, // ①: col3 上端
+            { row: 9, col: 3 }, // ②: col3 下端
+            { row: 0, col: 2 }, // ③: col2 上端
+            { row: 9, col: 2 }, // ④: col2 下端
+            { row: 0, col: 1 }, // ⑤: col1 上端
+            { row: 9, col: 1 }, // ⑥: col1 下端
+            { row: 0, col: 0 }, // ⑦: col0 上端
+            { row: 9, col: 0 }  // ⑧: col0 下端
+        ];
+        
+        let timerInterval;
+        let patternInterval;
+        
+        // 初期化
+        function initialize() {
+            // URLパラメータから設定を読み込み
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('level')) {
+                trainingConfig.level = parseInt(params.get('level'));
+            }
+            
+            // レベルに応じた速度設定
+            const speeds = {
+                1: 2000,    // 2秒
+                2: 1000,    // 1秒
+                3: 500,     // 0.5秒
+                4: 250,     // 0.25秒
+                5: 100,     // 0.1秒
+                6: 0        // 同時表示
+            };
+            trainingConfig.speed = speeds[trainingConfig.level] || 1000;
+            
+            // グリッド生成
+            createGrids();
+            
+            // 情報表示更新
+            updateTrainingInfo();
+            
+            // カウントダウン開始
+            startCountdown();
+        }
+        
+        // 各円の番号マッピング（row, col → 番号, 位置）
+        const circleNumbers = {
+            '0-3': { num: 1, pos: 'top' },
+            '9-3': { num: 2, pos: 'bottom' },
+            '0-2': { num: 3, pos: 'top' },
+            '9-2': { num: 4, pos: 'bottom' },
+            '0-1': { num: 5, pos: 'top' },
+            '9-1': { num: 6, pos: 'bottom' },
+            '0-0': { num: 7, pos: 'top' },
+            '9-0': { num: 8, pos: 'bottom' }
+        };
+
+        // グリッド生成
+        function createGrids() {
+            // P19グリッド生成
+            const p19Grid = document.getElementById('p19Grid');
+            for (let row = 0; row < 10; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const symbol = document.createElement('div');
+                    symbol.className = 'symbol';
+                    symbol.dataset.row = row;
+                    symbol.dataset.col = col;
+                    symbol.dataset.side = 'p19';
+
+                    // 対応する番号があれば追加
+                    const key = `${row}-${col}`;
+                    if (circleNumbers[key]) {
+                        const { num } = circleNumbers[key];
+                        const label = document.createElement('span');
+                        label.className = 'circle-number';
+                        label.textContent = num;
+                        symbol.appendChild(label);
+                    }
+
+                    p19Grid.appendChild(symbol);
+                }
+            }
+            
+        }
+        
+        // トレーニング情報更新
+        function updateTrainingInfo() {
+            const info = document.getElementById('trainingInfo');
+            const speedText = trainingConfig.level === 6 ? '同時表示' : `${trainingConfig.speed/1000}秒間隔`;
+            info.textContent = `レベル${trainingConfig.level}: ${speedText} / 複合パターン移動`;
+        }
+        
+        // カウントダウン
+        function startCountdown() {
+            const overlay = document.getElementById('startOverlay');
+            const countdown = document.getElementById('countdown');
+            let count = 3;
+            
+            const updateCount = () => {
+                if (count > 0) {
+                    countdown.textContent = count;
+                    count--;
+                    setTimeout(updateCount, 1000);
+                } else {
+                    overlay.classList.add('hidden');
+                    startTraining();
+                }
+            };
+            
+            updateCount();
+        }
+        
+        // トレーニング開始
+        function startTraining() {
+            trainingConfig.isRunning = true;
+            
+            // タイマー開始
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            // パターン開始
+            showCurrentPosition();
+            if (trainingConfig.speed > 0) {
+                patternInterval = setInterval(nextPosition, trainingConfig.speed);
+            }
+        }
+        
+        // タイマー更新
+        function updateTimer() {
+            trainingConfig.timeLeft--;
+            
+            const minutes = Math.floor(trainingConfig.timeLeft / 60);
+            const seconds = trainingConfig.timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (trainingConfig.timeLeft <= 0) {
+                endTraining();
+            }
+        }
+        
+        // 現在位置表示
+        function showCurrentPosition() {
+            // 全ての記号を非アクティブに（P19のみ）
+            document.querySelectorAll('.symbol[data-side="p19"]').forEach(symbol => {
+                symbol.classList.remove('active');
+            });
+            
+            // P19の現在位置の記号をアクティブに
+            if (trainingConfig.currentSide === 'p19') {
+                const pattern = p19Pattern[trainingConfig.currentPosition % p19Pattern.length];
+                const targetSymbol = document.querySelector(`[data-side="p19"][data-row="${pattern.row}"][data-col="${pattern.col}"]`);
+                
+                if (targetSymbol) {
+                    targetSymbol.classList.add('active');
+                }
+            }
+        }
+        
+        // 次の位置へ
+        function nextPosition() {
+            trainingConfig.currentPosition++;
+            if (trainingConfig.currentPosition >= trainingConfig.totalPositions) {
+                trainingConfig.currentPosition = 0;
+            }
+            showCurrentPosition();
+        }
+        
+        // 確認ボタン処理
+        function confirmView() {
+            if (!trainingConfig.isRunning) return;
+            
+            // 手動で次へ進む
+            nextPosition();
+            
+            // ボタンのフィードバック
+            const btn = document.getElementById('confirmBtn');
+            btn.style.background = '#333333';
+            setTimeout(() => {
+                btn.style.background = '#000000';
+            }, 100);
+        }
+        
+        // トレーニング終了
+        function endTraining() {
+            trainingConfig.isRunning = false;
+            clearInterval(timerInterval);
+            if (patternInterval) clearInterval(patternInterval);
+            
+            // クイズ画面へ遷移
+            window.location.href = `/quiz?training=complex&level=${trainingConfig.level}`;
+        }
+        
+        // 終了
+        function exitTraining() {
+            if (confirm('トレーニングを終了しますか？')) {
+                window.location.href = '/training-select';
+            }
+        }
+        
+        // キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                confirmView();
+            } else if (e.key === 'Escape') {
+                exitTraining();
+            }
+        });
+        
+        // 初期化実行
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>

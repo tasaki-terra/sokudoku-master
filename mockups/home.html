@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速読マスター - ホーム</title>
+    
+    <!-- Material UI CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            min-height: 100vh;
+        }
+        
+        /* ヘッダー */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-section i {
+            font-size: 32px;
+        }
+        
+        .app-name {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .level-display {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .points-display {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* メインコンテンツ */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        /* ウェルカムメッセージ */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-message {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .daily-streak {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .streak-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        
+        /* メニューグリッド */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .menu-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .menu-card.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .menu-card.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .menu-card.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .menu-card.warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+        
+        .menu-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .menu-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .menu-description {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .new-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff5252;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* 統計セクション */
+        .stats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stats-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f5f5f5;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 500;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* キャラクター表示 */
+        .character-preview {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .character-preview span {
+            font-size: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <i class="material-icons">speed</i>
+                <span class="app-name">速読マスター</span>
+            </div>
+            <div class="user-info">
+                <div class="level-display">
+                    <i class="material-icons">star</i>
+                    <span>レベル 5</span>
+                </div>
+                <div class="points-display">
+                    <i class="material-icons">monetization_on</i>
+                    <span>1,250 ポイント</span>
+                </div>
+                <button class="logout-btn">
+                    <i class="material-icons">logout</i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-container">
+        <!-- ウェルカムメッセージ -->
+        <div class="welcome-section">
+            <h1 class="welcome-message">こんにちは、たろうくん！</h1>
+            <p class="daily-streak">
+                連続ログイン
+                <span class="streak-badge">🔥 7日目</span>
+            </p>
+        </div>
+        
+        <!-- メニューグリッド -->
+        <div class="menu-grid">
+            <div class="menu-card primary" onclick="location.href='/training'">
+                <i class="material-icons menu-icon">fitness_center</i>
+                <h3 class="menu-title">トレーニング</h3>
+                <p class="menu-description">今日の訓練を始めよう</p>
+                <span class="new-badge">NEW</span>
+            </div>
+            
+            <div class="menu-card secondary" onclick="location.href='/collection'">
+                <i class="material-icons menu-icon">collections</i>
+                <h3 class="menu-title">キャラクター図鑑</h3>
+                <p class="menu-description">28/50 収集済み</p>
+            </div>
+            
+            <div class="menu-card success" onclick="location.href='/progress'">
+                <i class="material-icons menu-icon">trending_up</i>
+                <h3 class="menu-title">成長グラフ</h3>
+                <p class="menu-description">あなたの成長を確認</p>
+            </div>
+            
+            <div class="menu-card warning" onclick="location.href='/profile'">
+                <i class="material-icons menu-icon">settings</i>
+                <h3 class="menu-title">設定</h3>
+                <p class="menu-description">プロフィール編集</p>
+            </div>
+        </div>
+        
+        <!-- 統計セクション -->
+        <div class="stats-section">
+            <h2 class="stats-title">
+                <i class="material-icons">analytics</i>
+                今週の成績
+            </h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">14</div>
+                    <div class="stat-label">完了トレーニング</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">85%</div>
+                    <div class="stat-label">平均正答率</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">320</div>
+                    <div class="stat-label">今週の獲得ポイント</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2.5秒</div>
+                    <div class="stat-label">平均反応速度</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- キャラクター表示 -->
+    <div class="character-preview" onclick="location.href='/collection'">
+        <span>🦊</span>
+    </div>
+    
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    
+    <script>
+        // ログアウト処理
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            if (confirm('ログアウトしますか？')) {
+                window.location.href = '/login';
+            }
+        });
+        
+        // 初回訪問時のアニメーション
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.menu-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

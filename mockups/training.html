@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速読マスター - 基本訓練</title>
+    
+    <!-- Material UI CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            background: #e0f2e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* シンプルなヘッダー */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #000000;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        
+        .header-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .timer {
+            font-size: 20px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        
+        .exit-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            cursor: pointer;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .exit-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        /* メインコンテンツエリア */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 70px 20px 100px;
+        }
+        
+        /* トレーニングボード */
+        .training-board {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border: 2px solid #2e7d32;
+            border-radius: 8px;
+            padding: 40px 20px;
+            position: relative;
+        }
+        
+        /* 記号行 */
+        .symbol-row {
+            display: flex;
+            align-items: center;
+            margin: 40px 0;
+            position: relative;
+            gap: 0;
+        }
+        
+        /* 記号（○印） */
+        .symbol {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #2e7d32;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .symbol.large {
+            width: 70px;
+            height: 70px;
+        }
+        
+        .symbol.small {
+            width: 30px;
+            height: 30px;
+        }
+        
+        /* 矢印 */
+        .arrow {
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        /* 矢印の線部分（前回の85%に15%短縮：32px × 0.85 = 27.2px → 27px） */
+        .arrow::before {
+            content: '';
+            position: absolute;
+            width: 27px;
+            height: 2px;
+            background: #2e7d32;
+            top: 50%;
+            left: 9px;
+            transform: translateY(-50%);
+        }
+        
+        /* 矢印の先端 */
+        .arrow::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #2e7d32;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            top: 50%;
+            right: 6px;
+            transform: translateY(-50%);
+        }
+        
+        /* 赤い視点マーカー */
+        .focus-point {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #FF0000;
+            border-radius: 50%;
+            z-index: 10;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 4px rgba(255, 0, 0, 0.5);
+            transform: translate(-50%, -50%);
+        }
+        
+        .focus-point.hidden {
+            opacity: 0;
+        }
+        
+        /* 下部の確認ボタン */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        
+        .confirm-btn {
+            background: #000000;
+            color: white;
+            border: none;
+            padding: 15px 60px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .confirm-btn:hover {
+            background: #333333;
+            transform: translateY(-1px);
+        }
+        
+        .confirm-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 開始画面 */
+        .start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #fff9c4 0%, #c8e6c9 50%, #bbdefb 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .start-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-content {
+            text-align: center;
+            position: relative;
+        }
+
+        .start-characters {
+            font-size: 50px;
+            margin-bottom: 15px;
+            animation: bounce 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-12px); }
+        }
+
+        .start-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.08);
+        }
+
+        .start-instruction {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            background: rgba(255, 255, 255, 0.75);
+            padding: 15px 30px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .countdown {
+            font-size: 80px;
+            font-weight: bold;
+            color: #e53935;
+            margin: 10px 0;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.12);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .start-deco {
+            position: absolute;
+            font-size: 36px;
+            opacity: 0.5;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(10deg); }
+        }
+
+        .start-deco-1 { top: -60px; left: -80px; animation-delay: 0s; }
+        .start-deco-2 { top: -60px; right: -80px; animation-delay: 0.5s; }
+        .start-deco-3 { bottom: -60px; left: -80px; animation-delay: 1s; }
+        .start-deco-4 { bottom: -60px; right: -80px; animation-delay: 1.5s; }
+        
+        /* トレーニング情報 */
+        .training-info {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 14px;
+            color: #999999;
+        }
+        
+        /* 進捗インジケーター */
+        .progress-indicator {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            transition: background 0.3s ease;
+        }
+        
+        .progress-dot.active {
+            background: #2e7d32;
+        }
+        
+        .progress-dot.completed {
+            background: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <button class="exit-btn" onclick="exitTraining()">終了</button>
+        <div class="header-title">基本訓練</div>
+        <div class="timer" id="timer">03:00</div>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <div class="training-board" id="trainingBoard">
+            <div class="training-info" id="trainingInfo">
+                レベル1: 4分割 / 左端スタート
+            </div>
+            
+            <!-- 上段の記号列 -->
+            <div class="symbol-row" id="upperRow">
+                <div class="symbol" data-index="0"></div>
+                <div class="arrow" data-arrow-index="0"></div>
+                <div class="symbol" data-index="1"></div>
+                <div class="arrow" data-arrow-index="1"></div>
+                <div class="symbol" data-index="2"></div>
+                <div class="arrow" data-arrow-index="2"></div>
+                <div class="symbol" data-index="3"></div>
+                <div class="arrow" data-arrow-index="3"></div>
+                <div class="symbol" data-index="4"></div>
+                <div class="arrow" data-arrow-index="4"></div>
+                <div class="symbol" data-index="5"></div>
+                <div class="arrow" data-arrow-index="5"></div>
+                <div class="symbol" data-index="6"></div>
+            </div>
+            
+            <!-- 下段の記号列 -->
+            <div class="symbol-row" id="lowerRow">
+                <div class="symbol" data-index="7"></div>
+                <div class="arrow" data-arrow-index="6"></div>
+                <div class="symbol" data-index="8"></div>
+                <div class="arrow" data-arrow-index="7"></div>
+                <div class="symbol" data-index="9"></div>
+                <div class="arrow" data-arrow-index="8"></div>
+                <div class="symbol" data-index="10"></div>
+                <div class="arrow" data-arrow-index="9"></div>
+                <div class="symbol" data-index="11"></div>
+                <div class="arrow" data-arrow-index="10"></div>
+                <div class="symbol" data-index="12"></div>
+                <div class="arrow" data-arrow-index="11"></div>
+                <div class="symbol" data-index="13"></div>
+            </div>
+            
+            <!-- 赤い視点マーカー -->
+            <div class="focus-point hidden" id="focusPoint"></div>
+            
+            <!-- 進捗インジケーター -->
+            <div class="progress-indicator" id="progressIndicator">
+                <!-- 動的に生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 下部の確認ボタン -->
+    <div class="bottom-bar">
+        <button class="confirm-btn" id="confirmBtn" onclick="confirmView()">
+            確認
+        </button>
+    </div>
+    
+    <!-- 開始画面 -->
+    <div class="start-overlay" id="startOverlay">
+        <div class="start-content">
+            <span class="start-deco start-deco-1">⭐</span>
+            <span class="start-deco start-deco-2">🌟</span>
+            <span class="start-deco start-deco-3">✨</span>
+            <span class="start-deco start-deco-4">💫</span>
+            <div class="start-characters">🦊📚🐯</div>
+            <h1 class="start-title">基本訓練</h1>
+            <p class="start-instruction">
+                ○印に表示される赤い点を<br>
+                しっかりと見れたら、確認ボタンを押して次の場所を見てね！
+            </p>
+            <div class="countdown" id="countdown"></div>
+        </div>
+    </div>
+    
+    <script>
+        // トレーニング設定
+        const trainingConfig = {
+            level: 1, // 1: 4分割, 2: 8分割
+            symbolSize: 'medium', // small, medium, large
+            startDirection: 'left', // left, right
+            totalSymbols: 14,
+            currentSymbol: 0,
+            currentDivision: 0,
+            currentArrowDivision: 0,
+            isOnArrow: false,
+            timeLeft: 180, // 3分
+            isRunning: false
+        };
+        
+        // 分割パターン定義（円の直径に対する位置）
+        const divisionPatterns = {
+            4: [
+                { offset: -1.0, label: '左端', type: 'circle' },  // 円の左端線上
+                { offset: -0.6, label: '左', type: 'circle' },    // 左端と中心の中間（左寄りに微調整）
+                { offset: -0.1, label: '中央', type: 'circle' },  // 中心（左寄りに微調整）
+                { offset: 0.5, label: '右', type: 'circle' },     // 右側1/4
+                { offset: 1.0, label: '右端', type: 'circle' }    // 円の右端線上
+            ],
+            8: [
+                { offset: -1.0, label: '1', type: 'circle' },
+                { offset: -0.8, label: '2', type: 'circle' },     // 左端と中心の中間（左寄りに調整）
+                { offset: -0.6, label: '3', type: 'circle' },     // 左端と中心の中間付近
+                { offset: -0.3, label: '4', type: 'circle' },     // 中心寄り（左寄りに調整）
+                { offset: -0.1, label: '5', type: 'circle' },     // 中心（左寄りに微調整）
+                { offset: 0.25, label: '6', type: 'circle' },
+                { offset: 0.5, label: '7', type: 'circle' },
+                { offset: 0.75, label: '8', type: 'circle' },
+                { offset: 1.0, label: '9', type: 'circle' }
+            ]
+        };
+        
+        // 矢印上の赤点パターン（矢印線の両端と中央）
+        const arrowDivisionPattern = [
+            { offset: 'line-start', label: '矢印線始点', type: 'arrow' },  // 矢印線の始点
+            { offset: 'line-center', label: '矢印線中央', type: 'arrow' },  // 矢印線の中央
+            { offset: 'line-end', label: '矢印線終点', type: 'arrow' }      // 矢印線の終点
+        ];
+        
+        let timerInterval;
+        
+        // 初期化
+        function initialize() {
+            // URLパラメータから設定を読み込み
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('level')) {
+                trainingConfig.level = parseInt(params.get('level'));
+            }
+            if (params.get('size')) {
+                trainingConfig.symbolSize = params.get('size');
+            }
+            if (params.get('start')) {
+                trainingConfig.startDirection = params.get('start');
+            }
+            
+            // サイズ調整
+            applySymbolSize();
+            
+            // 方向調整
+            if (trainingConfig.startDirection === 'right') {
+                reverseSymbolOrder();
+            }
+            
+            // 情報表示更新
+            updateTrainingInfo();
+            
+            // 進捗インジケーター生成
+            createProgressIndicator();
+            
+            // カウントダウン開始
+            startCountdown();
+        }
+        
+        // 記号サイズ適用
+        function applySymbolSize() {
+            const symbols = document.querySelectorAll('.symbol');
+            symbols.forEach(symbol => {
+                symbol.className = `symbol ${trainingConfig.symbolSize}`;
+            });
+        }
+        
+        // 右端スタート時の順序反転
+        function reverseSymbolOrder() {
+            // 矢印の向きを左向きに変更（CSSで制御）
+            const arrows = document.querySelectorAll('.arrow');
+            arrows.forEach(arrow => {
+                arrow.style.transform = 'rotate(180deg)';
+            });
+            
+            // データインデックスも反転
+            const upperSymbols = document.querySelectorAll('#upperRow .symbol');
+            const lowerSymbols = document.querySelectorAll('#lowerRow .symbol');
+            
+            [...upperSymbols].reverse().forEach((symbol, index) => {
+                symbol.dataset.index = index;
+            });
+            
+            [...lowerSymbols].reverse().forEach((symbol, index) => {
+                symbol.dataset.index = index + 7;
+            });
+        }
+        
+        // トレーニング情報更新
+        function updateTrainingInfo() {
+            const info = document.getElementById('trainingInfo');
+            const levelText = trainingConfig.level === 1 ? '4分割' : '8分割';
+            const startText = trainingConfig.startDirection === 'left' ? '左端' : '右端';
+            const sizeText = {
+                small: '小',
+                medium: '中',
+                large: '大'
+            }[trainingConfig.symbolSize];
+            
+            info.textContent = `レベル${trainingConfig.level}: ${levelText} / ${startText}スタート / サイズ${sizeText}`;
+        }
+        
+        // 進捗インジケーター生成
+        function createProgressIndicator() {
+            const indicator = document.getElementById('progressIndicator');
+            for (let i = 0; i < trainingConfig.totalSymbols; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                dot.dataset.index = i;
+                indicator.appendChild(dot);
+            }
+        }
+        
+        // カウントダウン
+        function startCountdown() {
+            const overlay = document.getElementById('startOverlay');
+            const countdown = document.getElementById('countdown');
+            let count = 5;
+            
+            const updateCount = () => {
+                if (count > 0) {
+                    countdown.textContent = count;
+                    count--;
+                    setTimeout(updateCount, 1000);
+                } else {
+                    overlay.classList.add('hidden');
+                    startTraining();
+                }
+            };
+            
+            updateCount();
+        }
+        
+        // トレーニング開始
+        function startTraining() {
+            trainingConfig.isRunning = true;
+            
+            // タイマー開始
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            // 最初の赤点表示
+            showFocusPoint();
+        }
+        
+        // タイマー更新
+        function updateTimer() {
+            trainingConfig.timeLeft--;
+            
+            const minutes = Math.floor(trainingConfig.timeLeft / 60);
+            const seconds = trainingConfig.timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (trainingConfig.timeLeft <= 0) {
+                endTraining();
+            }
+        }
+        
+        // 赤点表示
+        function showFocusPoint() {
+            const focusPoint = document.getElementById('focusPoint');
+            const boardRect = document.getElementById('trainingBoard').getBoundingClientRect();
+            
+            if (trainingConfig.isOnArrow) {
+                // 矢印上に赤点を表示
+                const currentSymbolIndex = trainingConfig.currentSymbol;
+                const nextSymbolIndex = currentSymbolIndex + 1;
+                
+                // 現在の円と次の円を取得
+                const currentSymbol = document.querySelector(`.symbol[data-index="${currentSymbolIndex}"]`);
+                const nextSymbol = document.querySelector(`.symbol[data-index="${nextSymbolIndex}"]`);
+                
+                // 該当する矢印要素を取得
+                let arrowElement = null;
+                if (currentSymbolIndex < 7) {
+                    // 上段の矢印
+                    arrowElement = document.querySelector(`#upperRow .arrow[data-arrow-index="${currentSymbolIndex}"]`);
+                } else {
+                    // 下段の矢印
+                    arrowElement = document.querySelector(`#lowerRow .arrow[data-arrow-index="${currentSymbolIndex - 1}"]`);
+                }
+                
+                if (!currentSymbol || !nextSymbol || !arrowElement) {
+                    // 次の円がない場合は矢印表示をスキップ
+                    trainingConfig.isOnArrow = false;
+                    trainingConfig.currentSymbol++;
+                    trainingConfig.currentDivision = 0;
+                    if (trainingConfig.currentSymbol >= trainingConfig.totalSymbols) {
+                        trainingConfig.currentSymbol = 0;
+                    }
+                    showFocusPoint();
+                    return;
+                }
+                
+                const arrowRect = arrowElement.getBoundingClientRect();
+                
+                // 矢印の分割パターンを取得
+                const arrowDivision = arrowDivisionPattern[trainingConfig.currentArrowDivision];
+                
+                // 矢印線上の正確な位置を計算（新しい線長さ：27px）
+                const arrowLeft = arrowRect.left - boardRect.left;
+                // 矢印線の高さに合わせる（少し上に調整）
+                const centerY = arrowRect.top - boardRect.top + arrowRect.height / 2 - 1;
+                let posX;
+                
+                // 矢印線の実際の位置を計算（新しいleft位置: 9px）
+                if (arrowDivision.offset === 'line-start') {
+                    // 矢印線の始点（left: 9pxの位置）
+                    posX = arrowLeft + 9;
+                } else if (arrowDivision.offset === 'line-center') {
+                    // 矢印線の中心（left: 9px + 13.5px = 22.5pxの位置）
+                    posX = arrowLeft + 9 + 13.5;
+                } else if (arrowDivision.offset === 'line-end') {
+                    // 矢印線の終点（left: 9px + 27px = 36pxの位置）
+                    posX = arrowLeft + 9 + 27;
+                }
+                
+                focusPoint.style.left = `${posX}px`;
+                focusPoint.style.top = `${centerY}px`;
+                focusPoint.classList.remove('hidden');
+                
+            } else {
+                // 円上に赤点を表示
+                const currentSymbolElement = document.querySelector(`.symbol[data-index="${trainingConfig.currentSymbol}"]`);
+                
+                if (!currentSymbolElement) return;
+                
+                // 現在の記号の位置を取得
+                const rect = currentSymbolElement.getBoundingClientRect();
+                
+                // 分割パターンを取得
+                const divisionsCount = trainingConfig.level === 1 ? 4 : 8;
+                const divisions = divisionPatterns[divisionsCount];
+                const currentDivision = divisions[trainingConfig.currentDivision];
+                
+                // 赤点の位置を計算（円の周上に正確に配置）
+                const borderWidth = 2; // border幅
+                const radius = (rect.width - borderWidth * 2) / 2; // borderを考慮した内側の半径
+                const centerX = rect.left - boardRect.left + rect.width / 2;
+                const centerY = rect.top - boardRect.top + rect.height / 2;
+                
+                // 円の外周線上の位置を正確に計算（左右個別により精密に調整）
+                let offsetX;
+                if (currentDivision.offset === -1.0) {
+                    // 左端の場合：境界線の中央に正確に配置するため、さらに外側に調整
+                    offsetX = currentDivision.offset * (radius + borderWidth + 1);
+                } else if (currentDivision.offset === 1.0) {
+                    // 右端の場合：境界線の中央に正確に配置するため、さらに内側に調整
+                    offsetX = currentDivision.offset * (radius + borderWidth - 3);
+                } else {
+                    // 中間点の場合：通常の計算
+                    offsetX = currentDivision.offset * radius;
+                }
+                
+                focusPoint.style.left = `${centerX + offsetX}px`;
+                focusPoint.style.top = `${centerY}px`;
+                focusPoint.classList.remove('hidden');
+            }
+            
+            // 進捗インジケーター更新
+            updateProgressIndicator();
+        }
+        
+        // 進捗インジケーター更新
+        function updateProgressIndicator() {
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, index) => {
+                if (index < trainingConfig.currentSymbol) {
+                    dot.classList.add('completed');
+                    dot.classList.remove('active');
+                } else if (index === trainingConfig.currentSymbol) {
+                    dot.classList.add('active');
+                    dot.classList.remove('completed');
+                } else {
+                    dot.classList.remove('active', 'completed');
+                }
+            });
+        }
+        
+        // 確認ボタン処理
+        function confirmView() {
+            if (!trainingConfig.isRunning) return;
+            
+            const divisionsCount = trainingConfig.level === 1 ? 4 : 8;
+            const divisions = divisionPatterns[divisionsCount];
+            
+            if (trainingConfig.isOnArrow) {
+                // 矢印上の次の点へ
+                trainingConfig.currentArrowDivision++;
+                
+                if (trainingConfig.currentArrowDivision >= arrowDivisionPattern.length) {
+                    // 矢印の表示が終わったら次の円へ
+                    trainingConfig.currentArrowDivision = 0;
+                    trainingConfig.isOnArrow = false;
+                    trainingConfig.currentSymbol++;
+                    trainingConfig.currentDivision = 0;
+                    
+                    if (trainingConfig.currentSymbol >= trainingConfig.totalSymbols) {
+                        // 全て完了したら最初に戻る
+                        trainingConfig.currentSymbol = 0;
+                    }
+                }
+            } else {
+                // 円上の次の分割点へ
+                trainingConfig.currentDivision++;
+                
+                if (trainingConfig.currentDivision >= divisions.length) {
+                    // 円の表示が終わったら矢印へ（次の円がある場合）
+                    if (trainingConfig.currentSymbol < trainingConfig.totalSymbols - 1) {
+                        // 同じ行内で次の円がある場合のみ矢印を表示
+                        const currentRow = trainingConfig.currentSymbol < 7 ? 'upper' : 'lower';
+                        const nextSymbolIndex = trainingConfig.currentSymbol + 1;
+                        const nextRow = nextSymbolIndex < 7 ? 'upper' : 'lower';
+                        
+                        if (currentRow === nextRow) {
+                            trainingConfig.isOnArrow = true;
+                            trainingConfig.currentArrowDivision = 0;
+                        } else {
+                            // 行が変わる場合は矢印をスキップ
+                            trainingConfig.currentSymbol++;
+                            trainingConfig.currentDivision = 0;
+                            if (trainingConfig.currentSymbol >= trainingConfig.totalSymbols) {
+                                trainingConfig.currentSymbol = 0;
+                            }
+                        }
+                    } else {
+                        // 最後の円の場合は最初に戻る
+                        trainingConfig.currentSymbol = 0;
+                        trainingConfig.currentDivision = 0;
+                    }
+                }
+            }
+            
+            // 赤点を更新
+            showFocusPoint();
+            
+            // ボタンのフィードバック
+            const btn = document.getElementById('confirmBtn');
+            btn.style.background = '#333333';
+            setTimeout(() => {
+                btn.style.background = '#000000';
+            }, 100);
+        }
+        
+        // トレーニング終了
+        function endTraining() {
+            trainingConfig.isRunning = false;
+            clearInterval(timerInterval);
+            
+            // クイズ画面へ遷移
+            window.location.href = `/quiz?training=basic&level=${trainingConfig.level}`;
+        }
+        
+        // 終了
+        function exitTraining() {
+            if (confirm('トレーニングを終了しますか？')) {
+                window.location.href = '/training';
+            }
+        }
+        
+        // キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                confirmView();
+            } else if (e.key === 'Escape') {
+                exitTraining();
+            }
+        });
+        
+        // 初期化実行
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速読マスター - キャラクター図鑑</title>
+    
+    <!-- Material UI CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            min-height: 100vh;
+        }
+        
+        /* ヘッダー */
+        .collection-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .back-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 500;
+        }
+        
+        .collection-stats {
+            text-align: right;
+        }
+        
+        .collection-progress {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .collection-subtitle {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        /* メインコンテンツ */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        /* フィルターセクション */
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .filter-tab:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* キャラクターグリッド */
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .character-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .character-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .character-card.locked {
+            opacity: 0.6;
+            filter: grayscale(100%);
+        }
+        
+        .character-card.new {
+            animation: newCharacter 2s ease-in-out infinite;
+        }
+        
+        @keyframes newCharacter {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .character-image {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            position: relative;
+        }
+        
+        .character-image.common {
+            background: linear-gradient(135deg, #90caf9, #64b5f6);
+        }
+        
+        .character-image.rare {
+            background: linear-gradient(135deg, #ba68c8, #9c27b0);
+        }
+        
+        .character-image.epic {
+            background: linear-gradient(135deg, #ffb74d, #ff9800);
+        }
+        
+        .character-image.legendary {
+            background: linear-gradient(135deg, #ffd54f, #ffc107);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .character-image.legendary::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(0deg) translate(-100%, -100%); }
+            100% { transform: rotate(0deg) translate(100%, 100%); }
+        }
+        
+        .rarity-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .rarity-badge.common { background: #2196F3; }
+        .rarity-badge.rare { background: #9C27B0; }
+        .rarity-badge.epic { background: #FF9800; }
+        .rarity-badge.legendary { background: #FFC107; color: #333; }
+        
+        .character-info {
+            padding: 20px;
+        }
+        
+        .character-name {
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .character-description {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .character-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #999;
+            margin-top: 2px;
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .lock-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .unlock-condition {
+            font-size: 12px;
+            text-align: center;
+            padding: 0 10px;
+        }
+        
+        /* 詳細モーダル */
+        .character-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .character-modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 25px;
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+            animation: modalSlide 0.5s ease-out;
+        }
+        
+        @keyframes modalSlide {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+            color: white;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .modal-character-name {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .modal-character-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .modal-stat {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .modal-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .modal-stat-label {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="collection-header">
+        <div class="header-content">
+            <div class="back-section">
+                <button class="back-btn" onclick="location.href='/home'">
+                    <i class="material-icons">arrow_back</i>
+                </button>
+                <h1 class="page-title">キャラクター図鑑</h1>
+            </div>
+            <div class="collection-stats">
+                <div class="collection-progress">28 / 50</div>
+                <div class="collection-subtitle">コレクション達成率: 56%</div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-container">
+        <!-- フィルターセクション -->
+        <div class="filter-section">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">
+                    <i class="material-icons">grid_view</i>
+                    すべて
+                </button>
+                <button class="filter-tab" data-filter="common">
+                    <i class="material-icons">star_border</i>
+                    コモン
+                </button>
+                <button class="filter-tab" data-filter="rare">
+                    <i class="material-icons">star_half</i>
+                    レア
+                </button>
+                <button class="filter-tab" data-filter="epic">
+                    <i class="material-icons">star</i>
+                    エピック
+                </button>
+                <button class="filter-tab" data-filter="legendary">
+                    <i class="material-icons">stars</i>
+                    レジェンド
+                </button>
+                <button class="filter-tab" data-filter="unlocked">
+                    <i class="material-icons">lock_open</i>
+                    解放済み
+                </button>
+            </div>
+        </div>
+        
+        <!-- キャラクターグリッド -->
+        <div class="character-grid">
+            <!-- 解放済みキャラクター -->
+            <div class="character-card" data-rarity="common" onclick="showCharacterModal('rabbit')">
+                <div class="character-image common">
+                    <span>🐰</span>
+                    <div class="rarity-badge common">コモン</div>
+                </div>
+                <div class="character-info">
+                    <div class="character-name">スピードラビット</div>
+                    <div class="character-description">素早い動きで視線移動をサポート</div>
+                    <div class="character-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">Lv.3</div>
+                            <div class="stat-label">レベル</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">+5%</div>
+                            <div class="stat-label">速度</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">15回</div>
+                            <div class="stat-label">出現</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="character-card new" data-rarity="rare" onclick="showCharacterModal('owl')">
+                <div class="character-image rare">
+                    <span>🦉</span>
+                    <div class="rarity-badge rare">レア</div>
+                </div>
+                <div class="character-info">
+                    <div class="character-name">知恵フクロウ</div>
+                    <div class="character-description">集中力と記憶力を向上させる</div>
+                    <div class="character-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">Lv.1</div>
+                            <div class="stat-label">レベル</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">+10%</div>
+                            <div class="stat-label">記憶</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">NEW</div>
+                            <div class="stat-label">獲得</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="character-card" data-rarity="common" onclick="showCharacterModal('cat')">
+                <div class="character-image common">
+                    <span>🐱</span>
+                    <div class="rarity-badge common">コモン</div>
+                </div>
+                <div class="character-info">
+                    <div class="character-name">アジリティキャット</div>
+                    <div class="character-description">柔軟な視点移動をアシスト</div>
+                    <div class="character-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">Lv.5</div>
+                            <div class="stat-label">レベル</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">+8%</div>
+                            <div class="stat-label">精度</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">32回</div>
+                            <div class="stat-label">出現</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="character-card" data-rarity="epic" onclick="showCharacterModal('eagle')">
+                <div class="character-image epic">
+                    <span>🦅</span>
+                    <div class="rarity-badge epic">エピック</div>
+                </div>
+                <div class="character-info">
+                    <div class="character-name">ワシの眼光</div>
+                    <div class="character-description">遠距離視認能力を大幅強化</div>
+                    <div class="character-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">Lv.2</div>
+                            <div class="stat-label">レベル</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">+15%</div>
+                            <div class="stat-label">範囲</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">8回</div>
+                            <div class="stat-label">出現</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ロック済みキャラクター -->
+            <div class="character-card locked" data-rarity="legendary">
+                <div class="character-image legendary">
+                    <span>🐉</span>
+                    <div class="rarity-badge legendary">レジェンド</div>
+                </div>
+                <div class="character-info">
+                    <div class="character-name">???</div>
+                    <div class="character-description">神秘のキャラクター</div>
+                    <div class="character-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">???</div>
+                            <div class="stat-label">レベル</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">???</div>
+                            <div class="stat-label">効果</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0回</div>
+                            <div class="stat-label">出現</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lock-overlay">
+                    <i class="material-icons lock-icon">lock</i>
+                    <div class="unlock-condition">レベル20で解放</div>
+                </div>
+            </div>
+            
+            <div class="character-card locked" data-rarity="rare">
+                <div class="character-image rare">
+                    <span>🦊</span>
+                    <div class="rarity-badge rare">レア</div>
+                </div>
+                <div class="character-info">
+                    <div class="character-name">???</div>
+                    <div class="character-description">狡猾な戦略家</div>
+                    <div class="character-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">???</div>
+                            <div class="stat-label">レベル</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">???</div>
+                            <div class="stat-label">効果</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0回</div>
+                            <div class="stat-label">出現</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lock-overlay">
+                    <i class="material-icons lock-icon">lock</i>
+                    <div class="unlock-condition">連続10日ログインで解放</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- キャラクター詳細モーダル -->
+    <div class="character-modal" id="characterModal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="material-icons">close</i>
+                </button>
+                <span id="modalCharacterIcon">🦉</span>
+            </div>
+            <div class="modal-body">
+                <h2 class="modal-character-name" id="modalCharacterName">知恵フクロウ</h2>
+                <p class="modal-character-description" id="modalCharacterDescription">
+                    深い森の奥で長年生きてきた賢者。集中力と記憶力を飛躍的に向上させる特別な力を持っています。
+                    トレーニング中に現れると、より多くの記号を正確に覚えられるようになります。
+                </p>
+                <div class="modal-stats">
+                    <div class="modal-stat">
+                        <div class="modal-stat-value" id="modalLevel">Lv.1</div>
+                        <div class="modal-stat-label">レベル</div>
+                    </div>
+                    <div class="modal-stat">
+                        <div class="modal-stat-value" id="modalEffect">+10%</div>
+                        <div class="modal-stat-label">記憶力</div>
+                    </div>
+                    <div class="modal-stat">
+                        <div class="modal-stat-value" id="modalAppearance">NEW</div>
+                        <div class="modal-stat-label">獲得日</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    
+    <script>
+        // キャラクターデータ
+        const characterData = {
+            rabbit: {
+                name: 'スピードラビット',
+                icon: '🐰',
+                rarity: 'common',
+                description: '森の中を素早く駆け回るウサギ。その俊敏性により、視線移動の速度を向上させる特殊な能力を持っています。トレーニング中に現れると、記号の切り替えスピードが上がります。',
+                level: 3,
+                effect: '+5% 速度',
+                appearance: '15回出現'
+            },
+            owl: {
+                name: '知恵フクロウ',
+                icon: '🦉',
+                rarity: 'rare',
+                description: '深い森の奥で長年生きてきた賢者。集中力と記憶力を飛躍的に向上させる特別な力を持っています。トレーニング中に現れると、より多くの記号を正確に覚えられるようになります。',
+                level: 1,
+                effect: '+10% 記憶',
+                appearance: 'NEW!'
+            },
+            cat: {
+                name: 'アジリティキャット',
+                icon: '🐱',
+                rarity: 'common',  
+                description: 'しなやかな動きが特徴的な猫。柔軟な視点移動をサポートし、様々な角度からの観察力を高めてくれます。特に斜め方向のトレーニングで威力を発揮します。',
+                level: 5,
+                effect: '+8% 精度',
+                appearance: '32回出現'
+            },
+            eagle: {
+                name: 'ワシの眼光',
+                icon: '🦅',
+                rarity: 'epic',
+                description: '空の王者として知られるワシ。その鋭い眼光により、遠距離の視認能力を大幅に強化します。画面の端々まで見渡す力を与え、見落としを防いでくれます。',
+                level: 2,
+                effect: '+15% 範囲',
+                appearance: '8回出現'
+            }
+        };
+        
+        // フィルター機能
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                const cards = document.querySelectorAll('.character-card');
+                
+                cards.forEach(card => {
+                    if (filter === 'all') {
+                        card.style.display = 'block';
+                    } else if (filter === 'unlocked') {
+                        card.style.display = card.classList.contains('locked') ? 'none' : 'block';
+                    } else {
+                        card.style.display = card.dataset.rarity === filter ? 'block' : 'none';
+                    }
+                });
+            });
+        });
+        
+        // キャラクター詳細モーダル
+        function showCharacterModal(characterId) {
+            const data = characterData[characterId];
+            if (!data) return;
+            
+            const modal = document.getElementById('characterModal');
+            const header = document.getElementById('modalHeader');
+            const icon = document.getElementById('modalCharacterIcon');
+            const name = document.getElementById('modalCharacterName');
+            const description = document.getElementById('modalCharacterDescription');
+            const level = document.getElementById('modalLevel');
+            const effect = document.getElementById('modalEffect');
+            const appearance = document.getElementById('modalAppearance');
+            
+            // ヘッダーの背景色設定
+            header.className = `modal-header ${data.rarity}`;
+            icon.textContent = data.icon;
+            name.textContent = data.name;
+            description.textContent = data.description;
+            level.textContent = `Lv.${data.level}`;
+            effect.textContent = data.effect;
+            appearance.textContent = data.appearance;
+            
+            modal.classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('characterModal').classList.remove('show');
+        }
+        
+        // ページ読み込み時のアニメーション
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.character-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+        
+        // モーダル外クリックで閉じる
+        document.getElementById('characterModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // キーボードショートカット
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

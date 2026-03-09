@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速読マスター - デザインテーマ比較</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans JP', 'Roboto', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* ===== セレクター部分 ===== */
+        .selector-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #fff;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .selector-bar h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            white-space: nowrap;
+        }
+        .tab-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: 2px solid #ccc;
+            border-radius: 24px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+        .tab-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .tab-btn.active { color: #fff; border-color: transparent; transform: translateY(-2px); }
+        .tab-btn[data-theme="adventure"] { color: #e65100; }
+        .tab-btn[data-theme="adventure"].active { background: linear-gradient(135deg, #ff6d00, #e65100); }
+        .tab-btn[data-theme="space"] { color: #1a237e; }
+        .tab-btn[data-theme="space"].active { background: linear-gradient(135deg, #304ffe, #1a237e); }
+        .tab-btn[data-theme="nature"] { color: #2e7d32; }
+        .tab-btn[data-theme="nature"].active { background: linear-gradient(135deg, #66bb6a, #2e7d32); }
+        .tab-btn[data-theme="pop"] { color: #ad1457; }
+        .tab-btn[data-theme="pop"].active { background: linear-gradient(135deg, #f06292, #ad1457); }
+
+        .view-toggle {
+            margin-left: auto;
+            display: flex;
+            gap: 4px;
+        }
+        .view-btn {
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .view-btn:first-child { border-radius: 6px 0 0 6px; }
+        .view-btn:last-child { border-radius: 0 6px 6px 0; }
+        .view-btn.active { background: #333; color: #fff; border-color: #333; }
+
+        /* ===== テーマパネル ===== */
+        .theme-panel { display: none; }
+        .theme-panel.active { display: block; }
+
+        .all-themes {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .all-themes.active {
+            display: grid;
+        }
+        .all-themes .theme-panel {
+            display: block !important;
+            transform: scale(0.98);
+        }
+
+        /* ===== 共通プレビューレイアウト ===== */
+        .theme-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .all-themes .theme-container {
+            padding: 12px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 24px 0 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .all-themes .section-title {
+            font-size: 12px;
+            margin: 16px 0 8px;
+        }
+
+        /* カラーパレット */
+        .palette {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .color-chip {
+            width: 80px;
+            text-align: center;
+        }
+        .color-swatch {
+            width: 80px;
+            height: 56px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            margin-bottom: 6px;
+        }
+        .color-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #666;
+        }
+        .color-hex {
+            font-size: 10px;
+            color: #999;
+            font-family: monospace;
+        }
+
+        /* ヘッダープレビュー */
+        .preview-header {
+            border-radius: 12px;
+            padding: 16px 24px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            margin-bottom: 8px;
+        }
+        .preview-header .logo {
+            font-size: 22px;
+            font-weight: 900;
+        }
+        .preview-header .nav {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .preview-header .nav-item {
+            font-size: 13px;
+            opacity: 0.9;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .preview-header .nav-item:hover { background: rgba(255,255,255,0.2); }
+        .preview-header .level-badge {
+            font-size: 12px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        /* トレーニングカード */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        .all-themes .cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .training-card {
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .training-card:hover {
+            transform: translateY(-4px);
+        }
+        .card-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        .all-themes .card-icon {
+            font-size: 28px;
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .card-desc {
+            font-size: 12px;
+            opacity: 0.75;
+        }
+
+        /* ボタンプレビュー */
+        .buttons-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .btn-preview {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+        .btn-preview:hover { transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid;
+            padding: 10px 26px;
+        }
+        .btn-small {
+            padding: 8px 18px;
+            font-size: 13px;
+            border-radius: 8px;
+        }
+
+        /* 記録ページプレビュー */
+        .records-preview {
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 8px;
+        }
+        .record-header {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+        }
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+        .progress-bar-bg {
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+
+        /* テーマ説明 */
+        .theme-desc {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .theme-desc h2 {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+        .theme-desc p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        /* ===========================
+           テーマ1: 冒険
+           =========================== */
+        .adventure-bg { background: linear-gradient(160deg, #fff8e1 0%, #ffe0b2 100%); }
+        .adventure-header { background: linear-gradient(135deg, #ff8f00, #e65100); }
+        .adventure-header .level-badge { background: rgba(255,255,255,0.25); }
+        .adventure-card {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border: 2px solid #ffcc80;
+            color: #4e342e;
+        }
+        .adventure-card:hover { box-shadow: 0 8px 24px rgba(255,111,0,0.25); border-color: #ff8f00; }
+        .adventure-btn-primary {
+            background: linear-gradient(135deg, #ff8f00, #e65100);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(230,81,0,0.3);
+        }
+        .adventure-btn-primary:hover { box-shadow: 0 6px 20px rgba(230,81,0,0.4); }
+        .adventure-btn-outline { border-color: #e65100; color: #e65100; }
+        .adventure-records { background: #fff3e0; border: 2px solid #ffcc80; }
+        .adventure-records .record-header { color: #e65100; }
+        .adventure-stat { background: linear-gradient(135deg, #ffe0b2, #ffcc80); color: #4e342e; }
+        .adventure-progress-bg { background: #ffe0b2; }
+        .adventure-progress-fill { background: linear-gradient(90deg, #ff8f00, #e65100); }
+        .adventure-desc { border-color: #e65100; }
+
+        /* ===========================
+           テーマ2: 宇宙
+           =========================== */
+        .space-bg { background: linear-gradient(160deg, #0d1b2a 0%, #1b2838 50%, #162447 100%); }
+        .space-header {
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            border-bottom: 2px solid #00e5ff;
+        }
+        .space-header .logo { text-shadow: 0 0 20px rgba(0,229,255,0.5); }
+        .space-header .level-badge { background: rgba(0,229,255,0.2); border: 1px solid #00e5ff; }
+        .space-card {
+            background: rgba(26,35,126,0.4);
+            border: 1px solid rgba(0,229,255,0.3);
+            color: #e0e0e0;
+            backdrop-filter: blur(4px);
+        }
+        .space-card:hover {
+            box-shadow: 0 0 24px rgba(0,229,255,0.3);
+            border-color: #00e5ff;
+        }
+        .space-btn-primary {
+            background: linear-gradient(135deg, #00e5ff, #2979ff);
+            color: #0d1b2a;
+            font-weight: 900;
+            box-shadow: 0 0 16px rgba(0,229,255,0.3);
+        }
+        .space-btn-primary:hover { box-shadow: 0 0 28px rgba(0,229,255,0.5); }
+        .space-btn-outline { border-color: #00e5ff; color: #00e5ff; }
+        .space-records {
+            background: rgba(26,35,126,0.3);
+            border: 1px solid rgba(0,229,255,0.2);
+            color: #e0e0e0;
+        }
+        .space-records .record-header { color: #00e5ff; }
+        .space-stat { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); color: #e0e0e0; }
+        .space-progress-bg { background: rgba(0,229,255,0.15); }
+        .space-progress-fill { background: linear-gradient(90deg, #00e5ff, #2979ff); box-shadow: 0 0 8px rgba(0,229,255,0.5); }
+        .space-desc { border-color: #00e5ff; background: #1a237e; color: #e0e0e0; }
+        .space-desc p { color: #b0bec5; }
+
+        /* ===========================
+           テーマ3: 自然
+           =========================== */
+        .nature-bg { background: linear-gradient(160deg, #e8f5e9 0%, #c8e6c9 100%); }
+        .nature-header { background: linear-gradient(135deg, #43a047, #2e7d32); }
+        .nature-header .level-badge { background: rgba(255,255,255,0.25); }
+        .nature-card {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 2px solid #a5d6a7;
+            color: #1b5e20;
+        }
+        .nature-card:hover { box-shadow: 0 8px 24px rgba(46,125,50,0.2); border-color: #43a047; }
+        .nature-btn-primary {
+            background: linear-gradient(135deg, #66bb6a, #2e7d32);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+        }
+        .nature-btn-primary:hover { box-shadow: 0 6px 20px rgba(46,125,50,0.4); }
+        .nature-btn-outline { border-color: #2e7d32; color: #2e7d32; }
+        .nature-records { background: #e8f5e9; border: 2px solid #a5d6a7; }
+        .nature-records .record-header { color: #2e7d32; }
+        .nature-stat { background: linear-gradient(135deg, #c8e6c9, #a5d6a7); color: #1b5e20; }
+        .nature-progress-bg { background: #c8e6c9; }
+        .nature-progress-fill { background: linear-gradient(90deg, #66bb6a, #2e7d32); }
+        .nature-desc { border-color: #2e7d32; }
+
+        /* ===========================
+           テーマ4: ポップ
+           =========================== */
+        .pop-bg { background: linear-gradient(160deg, #fce4ec 0%, #e1f5fe 50%, #fff9c4 100%); }
+        .pop-header {
+            background: linear-gradient(135deg, #f06292, #ba68c8, #64b5f6);
+        }
+        .pop-header .level-badge { background: rgba(255,255,255,0.3); }
+        .pop-card {
+            background: #fff;
+            border: 2px solid #f8bbd0;
+            color: #4a148c;
+        }
+        .pop-card:nth-child(2) { border-color: #b39ddb; }
+        .pop-card:nth-child(3) { border-color: #90caf9; }
+        .pop-card:nth-child(4) { border-color: #fff59d; }
+        .pop-card:nth-child(5) { border-color: #a5d6a7; }
+        .pop-card:nth-child(6) { border-color: #ffab91; }
+        .pop-card:hover { box-shadow: 0 8px 24px rgba(240,98,146,0.25); }
+        .pop-btn-primary {
+            background: linear-gradient(135deg, #f06292, #ba68c8);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(240,98,146,0.3);
+        }
+        .pop-btn-primary:hover { box-shadow: 0 6px 20px rgba(240,98,146,0.4); }
+        .pop-btn-outline { border-color: #f06292; color: #f06292; }
+        .pop-records { background: #fff; border: 2px solid #f8bbd0; }
+        .pop-records .record-header { color: #ad1457; }
+        .pop-stat { color: #4a148c; }
+        .pop-stat:nth-child(1) { background: #fce4ec; }
+        .pop-stat:nth-child(2) { background: #ede7f6; }
+        .pop-stat:nth-child(3) { background: #e1f5fe; }
+        .pop-progress-bg { background: #f8bbd0; }
+        .pop-progress-fill { background: linear-gradient(90deg, #f06292, #ba68c8, #64b5f6); }
+        .pop-desc { border-color: #f06292; }
+
+        /* 星デコレーション（宇宙テーマ） */
+        .stars {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .star {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+        }
+        @keyframes twinkle { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* ページ全体プレビュー */
+        .page-preview {
+            border-radius: 16px;
+            overflow: hidden;
+            min-height: 200px;
+            padding: 20px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+<!-- セレクターバー -->
+<div class="selector-bar">
+    <h1>速読マスター デザインテーマ比較</h1>
+    <div class="tab-group">
+        <button class="tab-btn active" data-theme="adventure" onclick="switchTheme('adventure')">1. 冒険テーマ</button>
+        <button class="tab-btn" data-theme="space" onclick="switchTheme('space')">2. 宇宙テーマ</button>
+        <button class="tab-btn" data-theme="nature" onclick="switchTheme('nature')">3. 自然テーマ</button>
+        <button class="tab-btn" data-theme="pop" onclick="switchTheme('pop')">4. ポップテーマ</button>
+    </div>
+    <div class="view-toggle">
+        <button class="view-btn active" onclick="setView('single')">個別表示</button>
+        <button class="view-btn" onclick="setView('all')">4案比較</button>
+    </div>
+</div>
+
+<!-- ===== テーマ1: 冒険 ===== -->
+<div class="theme-panel active" id="panel-adventure">
+    <div class="theme-container">
+        <div class="theme-desc adventure-desc">
+            <h2>1. 冒険テーマ - RPG風の冒険マップ</h2>
+            <p>温かみのあるオレンジ・ブラウン系の暖色で、RPG冒険ゲームの世界観を演出。トレーニングを「クエスト」に見立て、子どもの冒険心を刺激します。宝箱や地図のモチーフで達成感を視覚化。</p>
+        </div>
+
+        <div class="section-title">カラーパレット</div>
+        <div class="palette">
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(135deg, #ff8f00, #e65100);"></div>
+                <div class="color-label">Primary</div>
+                <div class="color-hex">#FF8F00</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(135deg, #8d6e63, #5d4037);"></div>
+                <div class="color-label">Secondary</div>
+                <div class="color-hex">#8D6E63</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(160deg, #fff8e1, #ffe0b2); border: 1px solid #eee;"></div>
+                <div class="color-label">Background</div>
+                <div class="color-hex">#FFF8E1</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #4e342e;"></div>
+                <div class="color-label">Text</div>
+                <div class="color-hex">#4E342E</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #ffc107;"></div>
+                <div class="color-label">Accent</div>
+                <div class="color-hex">#FFC107</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #ffcc80;"></div>
+                <div class="color-label">Border</div>
+                <div class="color-hex">#FFCC80</div>
+            </div>
+        </div>
+
+        <div class="section-title">ヘッダー</div>
+        <div class="preview-header adventure-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">&#x1F5FA;&#xFE0F;</span>
+                <span class="logo">速読マスター</span>
+            </div>
+            <div class="nav">
+                <span class="level-badge">&#x2694;&#xFE0F; Lv.12 冒険者</span>
+                <span class="level-badge">&#x1F4B0; 2,450 G</span>
+                <span class="nav-item">&#x1F3F0; トレーニング</span>
+                <span class="nav-item">&#x1F4DC; 記録</span>
+            </div>
+        </div>
+
+        <div class="section-title">トレーニングカード（6種類のトレーニング）</div>
+        <div class="cards-grid">
+            <div class="training-card adventure-card">
+                <div class="card-icon">&#x2194;&#xFE0F;</div>
+                <div class="card-title">水平クエスト</div>
+                <div class="card-desc">左右に視線を動かして宝を探せ！</div>
+            </div>
+            <div class="training-card adventure-card">
+                <div class="card-icon">&#x2195;&#xFE0F;</div>
+                <div class="card-title">垂直クエスト</div>
+                <div class="card-desc">上下に視線を動かして塔を登れ！</div>
+            </div>
+            <div class="training-card adventure-card">
+                <div class="card-icon">&#x2197;&#xFE0F;</div>
+                <div class="card-title">斜めクエスト</div>
+                <div class="card-desc">斜めに視線を動かして山を越えろ！</div>
+            </div>
+            <div class="training-card adventure-card">
+                <div class="card-icon">&#x1F504;</div>
+                <div class="card-title">複合クエスト</div>
+                <div class="card-desc">あらゆる方向で迷宮を攻略せよ！</div>
+            </div>
+            <div class="training-card adventure-card">
+                <div class="card-icon">&#x1F522;</div>
+                <div class="card-title">順番追跡クエスト</div>
+                <div class="card-desc">正しい順番で古代文字を解読！</div>
+            </div>
+            <div class="training-card adventure-card">
+                <div class="card-icon">&#x27A1;&#xFE0F;</div>
+                <div class="card-title">連続水平クエスト</div>
+                <div class="card-desc">一気に読み進めて大陸を横断！</div>
+            </div>
+        </div>
+
+        <div class="section-title">ボタンスタイル</div>
+        <div class="buttons-row">
+            <button class="btn-preview adventure-btn-primary">&#x2694;&#xFE0F; クエスト開始！</button>
+            <button class="btn-preview adventure-btn-primary btn-small">次のレベルへ</button>
+            <button class="btn-preview btn-outline adventure-btn-outline">&#x1F4DC; 冒険の記録</button>
+            <button class="btn-preview btn-outline adventure-btn-outline btn-small">戻る</button>
+        </div>
+
+        <div class="section-title">結果・記録ページ (/records)</div>
+        <div class="records-preview adventure-records">
+            <div class="record-header">&#x1F4DC; 冒険の記録</div>
+            <div class="stats-row">
+                <div class="stat-card adventure-stat">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">クリア済みクエスト</div>
+                </div>
+                <div class="stat-card adventure-stat">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">現在のレベル</div>
+                </div>
+                <div class="stat-card adventure-stat">
+                    <div class="stat-value">2,450</div>
+                    <div class="stat-label">獲得ゴールド</div>
+                </div>
+            </div>
+            <div style="font-size:13px;color:#5d4037;margin-bottom:6px;font-weight:700;">冒険の進捗</div>
+            <div class="progress-bar-bg adventure-progress-bg">
+                <div class="progress-bar-fill adventure-progress-fill" style="width: 68%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== テーマ2: 宇宙 ===== -->
+<div class="theme-panel" id="panel-space">
+    <div class="theme-container">
+        <div class="theme-desc space-desc">
+            <h2>2. 宇宙テーマ - 星と惑星の世界</h2>
+            <p>深いダークブルーにネオンカラーが映える、宇宙探索の世界観。トレーニングを「ミッション」に見立て、惑星や星座のモチーフで神秘的かつクールな印象を演出。高学年にも響くデザイン。</p>
+        </div>
+
+        <div class="section-title">カラーパレット</div>
+        <div class="palette">
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(135deg, #00e5ff, #2979ff);"></div>
+                <div class="color-label">Primary</div>
+                <div class="color-hex">#00E5FF</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(135deg, #7c4dff, #6200ea);"></div>
+                <div class="color-label">Secondary</div>
+                <div class="color-hex">#7C4DFF</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(160deg, #0d1b2a, #162447);"></div>
+                <div class="color-label">Background</div>
+                <div class="color-hex">#0D1B2A</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #e0e0e0;"></div>
+                <div class="color-label">Text</div>
+                <div class="color-hex">#E0E0E0</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #ffea00;"></div>
+                <div class="color-label">Accent</div>
+                <div class="color-hex">#FFEA00</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: rgba(0,229,255,0.3); border: 1px solid #00e5ff;"></div>
+                <div class="color-label">Border</div>
+                <div class="color-hex">rgba(0,229,255)</div>
+            </div>
+        </div>
+
+        <div class="section-title">ヘッダー</div>
+        <div class="preview-header space-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">&#x1F680;</span>
+                <span class="logo">速読マスター</span>
+            </div>
+            <div class="nav">
+                <span class="level-badge">&#x2B50; Rank A - 宇宙飛行士</span>
+                <span class="level-badge">&#x1FA90; 2,450 SP</span>
+                <span class="nav-item">&#x1F6F8; トレーニング</span>
+                <span class="nav-item">&#x1F30D; 記録</span>
+            </div>
+        </div>
+
+        <div class="section-title">トレーニングカード（6種類のトレーニング）</div>
+        <div class="page-preview space-bg" style="position:relative;">
+            <div class="cards-grid">
+                <div class="training-card space-card">
+                    <div class="card-icon">&#x2194;&#xFE0F;</div>
+                    <div class="card-title">水平スキャン</div>
+                    <div class="card-desc">小惑星帯を水平に横断せよ</div>
+                </div>
+                <div class="training-card space-card">
+                    <div class="card-icon">&#x2195;&#xFE0F;</div>
+                    <div class="card-title">垂直スキャン</div>
+                    <div class="card-desc">宇宙エレベーターで上下移動</div>
+                </div>
+                <div class="training-card space-card">
+                    <div class="card-icon">&#x2197;&#xFE0F;</div>
+                    <div class="card-title">斜めスキャン</div>
+                    <div class="card-desc">流れ星を追跡せよ</div>
+                </div>
+                <div class="training-card space-card">
+                    <div class="card-icon">&#x1F300;</div>
+                    <div class="card-title">複合スキャン</div>
+                    <div class="card-desc">銀河系をくまなく探索</div>
+                </div>
+                <div class="training-card space-card">
+                    <div class="card-icon">&#x1F522;</div>
+                    <div class="card-title">順番追跡ミッション</div>
+                    <div class="card-desc">星座を正しい順番で結べ</div>
+                </div>
+                <div class="training-card space-card">
+                    <div class="card-icon">&#x27A1;&#xFE0F;</div>
+                    <div class="card-title">連続水平ミッション</div>
+                    <div class="card-desc">光速で文字を読み取れ</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">ボタンスタイル</div>
+        <div class="buttons-row">
+            <button class="btn-preview space-btn-primary">&#x1F680; ミッション開始！</button>
+            <button class="btn-preview space-btn-primary btn-small">次のステージへ</button>
+            <button class="btn-preview btn-outline space-btn-outline">&#x1F30D; 航行記録</button>
+            <button class="btn-preview btn-outline space-btn-outline btn-small">戻る</button>
+        </div>
+
+        <div class="section-title">結果・記録ページ (/records)</div>
+        <div class="records-preview space-records">
+            <div class="record-header">&#x1F30D; 航行記録</div>
+            <div class="stats-row">
+                <div class="stat-card space-stat">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">完了ミッション</div>
+                </div>
+                <div class="stat-card space-stat">
+                    <div class="stat-value">A</div>
+                    <div class="stat-label">現在のランク</div>
+                </div>
+                <div class="stat-card space-stat">
+                    <div class="stat-value">2,450</div>
+                    <div class="stat-label">スターポイント</div>
+                </div>
+            </div>
+            <div style="font-size:13px;color:#90caf9;margin-bottom:6px;font-weight:700;">探索進捗</div>
+            <div class="progress-bar-bg space-progress-bg">
+                <div class="progress-bar-fill space-progress-fill" style="width: 68%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== テーマ3: 自然 ===== -->
+<div class="theme-panel" id="panel-nature">
+    <div class="theme-container">
+        <div class="theme-desc nature-desc">
+            <h2>3. 自然テーマ - 森と草原の世界</h2>
+            <p>みずみずしいグリーン系のナチュラル配色で、森や草原の自然豊かな世界を表現。トレーニングを「森の冒険」に見立て、動物や植物のモチーフで優しく親しみやすい雰囲気を演出。低学年にも安心感を与えるデザイン。</p>
+        </div>
+
+        <div class="section-title">カラーパレット</div>
+        <div class="palette">
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(135deg, #66bb6a, #2e7d32);"></div>
+                <div class="color-label">Primary</div>
+                <div class="color-hex">#43A047</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(135deg, #a1887f, #795548);"></div>
+                <div class="color-label">Secondary</div>
+                <div class="color-hex">#795548</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(160deg, #e8f5e9, #c8e6c9); border: 1px solid #eee;"></div>
+                <div class="color-label">Background</div>
+                <div class="color-hex">#E8F5E9</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #1b5e20;"></div>
+                <div class="color-label">Text</div>
+                <div class="color-hex">#1B5E20</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #ffb300;"></div>
+                <div class="color-label">Accent</div>
+                <div class="color-hex">#FFB300</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #a5d6a7;"></div>
+                <div class="color-label">Border</div>
+                <div class="color-hex">#A5D6A7</div>
+            </div>
+        </div>
+
+        <div class="section-title">ヘッダー</div>
+        <div class="preview-header nature-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">&#x1F333;</span>
+                <span class="logo">速読マスター</span>
+            </div>
+            <div class="nav">
+                <span class="level-badge">&#x1F43B; Lv.12 森の賢者</span>
+                <span class="level-badge">&#x1F343; 2,450 リーフ</span>
+                <span class="nav-item">&#x1F332; トレーニング</span>
+                <span class="nav-item">&#x1F4D6; 記録</span>
+            </div>
+        </div>
+
+        <div class="section-title">トレーニングカード（6種類のトレーニング）</div>
+        <div class="cards-grid">
+            <div class="training-card nature-card">
+                <div class="card-icon">&#x1F98B;</div>
+                <div class="card-title">水平トレーニング</div>
+                <div class="card-desc">蝶々を追いかけて左右を見よう</div>
+            </div>
+            <div class="training-card nature-card">
+                <div class="card-icon">&#x1F333;</div>
+                <div class="card-title">垂直トレーニング</div>
+                <div class="card-desc">大きな木を上から下まで見よう</div>
+            </div>
+            <div class="training-card nature-card">
+                <div class="card-icon">&#x1F426;</div>
+                <div class="card-title">斜めトレーニング</div>
+                <div class="card-desc">鳥の飛ぶ道を目で追おう</div>
+            </div>
+            <div class="training-card nature-card">
+                <div class="card-icon">&#x1F43F;&#xFE0F;</div>
+                <div class="card-title">複合トレーニング</div>
+                <div class="card-desc">リスと一緒に森を探検しよう</div>
+            </div>
+            <div class="training-card nature-card">
+                <div class="card-icon">&#x1F43E;</div>
+                <div class="card-title">順番追跡トレーニング</div>
+                <div class="card-desc">動物の足あとを順番に追おう</div>
+            </div>
+            <div class="training-card nature-card">
+                <div class="card-icon">&#x1F40C;</div>
+                <div class="card-title">連続水平トレーニング</div>
+                <div class="card-desc">小川に沿ってどんどん読もう</div>
+            </div>
+        </div>
+
+        <div class="section-title">ボタンスタイル</div>
+        <div class="buttons-row">
+            <button class="btn-preview nature-btn-primary">&#x1F332; 森へ出発！</button>
+            <button class="btn-preview nature-btn-primary btn-small">次のエリアへ</button>
+            <button class="btn-preview btn-outline nature-btn-outline">&#x1F4D6; 成長の記録</button>
+            <button class="btn-preview btn-outline nature-btn-outline btn-small">戻る</button>
+        </div>
+
+        <div class="section-title">結果・記録ページ (/records)</div>
+        <div class="records-preview nature-records">
+            <div class="record-header">&#x1F4D6; 成長の記録</div>
+            <div class="stats-row">
+                <div class="stat-card nature-stat">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">完了トレーニング</div>
+                </div>
+                <div class="stat-card nature-stat">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">現在のレベル</div>
+                </div>
+                <div class="stat-card nature-stat">
+                    <div class="stat-value">2,450</div>
+                    <div class="stat-label">集めたリーフ</div>
+                </div>
+            </div>
+            <div style="font-size:13px;color:#2e7d32;margin-bottom:6px;font-weight:700;">成長の記録</div>
+            <div class="progress-bar-bg nature-progress-bg">
+                <div class="progress-bar-fill nature-progress-fill" style="width: 68%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== テーマ4: ポップ ===== -->
+<div class="theme-panel" id="panel-pop">
+    <div class="theme-container">
+        <div class="theme-desc pop-desc">
+            <h2>4. ポップテーマ - カラフル＆パステル</h2>
+            <p>明るいパステルカラーをふんだんに使った、元気でポップなデザイン。カード毎に異なるカラーアクセントで楽しさを演出。お祭りやカーニバルのようなワクワク感で、全学年にアピールする万能テーマ。</p>
+        </div>
+
+        <div class="section-title">カラーパレット</div>
+        <div class="palette">
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(135deg, #f06292, #ad1457);"></div>
+                <div class="color-label">Primary</div>
+                <div class="color-hex">#F06292</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(135deg, #ba68c8, #7b1fa2);"></div>
+                <div class="color-label">Secondary</div>
+                <div class="color-hex">#BA68C8</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: linear-gradient(160deg, #fce4ec, #e1f5fe, #fff9c4); border: 1px solid #eee;"></div>
+                <div class="color-label">Background</div>
+                <div class="color-hex">#FCE4EC</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #4a148c;"></div>
+                <div class="color-label">Text</div>
+                <div class="color-hex">#4A148C</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #64b5f6;"></div>
+                <div class="color-label">Accent</div>
+                <div class="color-hex">#64B5F6</div>
+            </div>
+            <div class="color-chip">
+                <div class="color-swatch" style="background: #f8bbd0;"></div>
+                <div class="color-label">Border</div>
+                <div class="color-hex">#F8BBD0</div>
+            </div>
+        </div>
+
+        <div class="section-title">ヘッダー</div>
+        <div class="preview-header pop-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">&#x1F31F;</span>
+                <span class="logo">速読マスター</span>
+            </div>
+            <div class="nav">
+                <span class="level-badge">&#x1F451; Lv.12 スーパーリーダー</span>
+                <span class="level-badge">&#x1F48E; 2,450 pt</span>
+                <span class="nav-item">&#x1F3AE; トレーニング</span>
+                <span class="nav-item">&#x1F3C6; 記録</span>
+            </div>
+        </div>
+
+        <div class="section-title">トレーニングカード（6種類のトレーニング）</div>
+        <div class="cards-grid">
+            <div class="training-card pop-card">
+                <div class="card-icon">&#x1F338;</div>
+                <div class="card-title">よこよこトレーニング</div>
+                <div class="card-desc">左右にすいすい目を動かそう！</div>
+            </div>
+            <div class="training-card pop-card">
+                <div class="card-icon">&#x1F308;</div>
+                <div class="card-title">たてたてトレーニング</div>
+                <div class="card-desc">上下にぴょんぴょん目を動かそう！</div>
+            </div>
+            <div class="training-card pop-card">
+                <div class="card-icon">&#x2B50;</div>
+                <div class="card-title">ななめトレーニング</div>
+                <div class="card-desc">ななめにシュッと目を動かそう！</div>
+            </div>
+            <div class="training-card pop-card">
+                <div class="card-icon">&#x1F389;</div>
+                <div class="card-title">ミックストレーニング</div>
+                <div class="card-desc">いろんな方向にチャレンジ！</div>
+            </div>
+            <div class="training-card pop-card">
+                <div class="card-icon">&#x1F3AF;</div>
+                <div class="card-title">じゅんばんトレーニング</div>
+                <div class="card-desc">番号を順番に見つけよう！</div>
+            </div>
+            <div class="training-card pop-card">
+                <div class="card-icon">&#x1F680;</div>
+                <div class="card-title">れんぞくトレーニング</div>
+                <div class="card-desc">どんどん読んでスピードアップ！</div>
+            </div>
+        </div>
+
+        <div class="section-title">ボタンスタイル</div>
+        <div class="buttons-row">
+            <button class="btn-preview pop-btn-primary">&#x1F31F; スタート！</button>
+            <button class="btn-preview pop-btn-primary btn-small">つぎへ！</button>
+            <button class="btn-preview btn-outline pop-btn-outline">&#x1F3C6; きろく</button>
+            <button class="btn-preview btn-outline pop-btn-outline btn-small">もどる</button>
+        </div>
+
+        <div class="section-title">結果・記録ページ (/records)</div>
+        <div class="records-preview pop-records">
+            <div class="record-header">&#x1F3C6; みんなのきろく</div>
+            <div class="stats-row">
+                <div class="stat-card pop-stat">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">クリアしたかず</div>
+                </div>
+                <div class="stat-card pop-stat">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">いまのレベル</div>
+                </div>
+                <div class="stat-card pop-stat">
+                    <div class="stat-value">2,450</div>
+                    <div class="stat-label">あつめたポイント</div>
+                </div>
+            </div>
+            <div style="font-size:13px;color:#ad1457;margin-bottom:6px;font-weight:700;">レベルアップまで</div>
+            <div class="progress-bar-bg pop-progress-bg">
+                <div class="progress-bar-fill pop-progress-fill" style="width: 68%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 4案比較表示 ===== -->
+<div class="all-themes" id="all-themes-grid">
+    <!-- JSで中身をクローンして挿入 -->
+</div>
+
+<script>
+    let currentView = 'single';
+    let currentTheme = 'adventure';
+
+    const themes = ['adventure', 'space', 'nature', 'pop'];
+
+    function switchTheme(theme) {
+        currentTheme = theme;
+
+        // タブボタン更新
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === theme);
+        });
+
+        if (currentView === 'single') {
+            // パネル切り替え
+            document.querySelectorAll('#panel-adventure, #panel-space, #panel-nature, #panel-pop').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById('panel-' + theme).classList.add('active');
+        }
+    }
+
+    function setView(view) {
+        currentView = view;
+
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent === (view === 'single' ? '個別表示' : '4案比較'));
+        });
+
+        const allGrid = document.getElementById('all-themes-grid');
+        const panels = document.querySelectorAll('#panel-adventure, #panel-space, #panel-nature, #panel-pop');
+
+        if (view === 'all') {
+            // 個別パネルを非表示
+            panels.forEach(p => p.classList.remove('active'));
+
+            // 4案比較グリッドを構築
+            allGrid.innerHTML = '';
+            themes.forEach(theme => {
+                const original = document.getElementById('panel-' + theme);
+                const clone = original.cloneNode(true);
+                clone.id = 'clone-' + theme;
+                clone.style.display = 'block';
+                clone.classList.add('active');
+                allGrid.appendChild(clone);
+            });
+            allGrid.classList.add('active');
+
+            // タブボタンを無効化風に
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+            });
+        } else {
+            allGrid.classList.remove('active');
+            allGrid.innerHTML = '';
+
+            // タブボタンを有効化
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            });
+
+            switchTheme(currentTheme);
+        }
+    }
+</script>
+
+</body>
+</html>

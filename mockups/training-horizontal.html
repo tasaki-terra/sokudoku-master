@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速読マスター - 視覚開発FMⅠ表</title>
+    
+    <!-- Material UI CDN -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            background: #e0f2e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* シンプルなヘッダー */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #000000;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        
+        .header-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .timer {
+            font-size: 20px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        
+        .exit-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            cursor: pointer;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .exit-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        /* メインコンテンツエリア */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 70px 20px 100px;
+        }
+        
+        /* トレーニングボード */
+        .training-board {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border: 2px solid #2e7d32;
+            border-radius: 8px;
+            padding: 40px 20px;
+            position: relative;
+        }
+        
+        /* 水平移動用の行 */
+        .horizontal-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        /* 記号（○印） */
+        .symbol {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #2e7d32;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        
+        .symbol.active {
+            opacity: 1;
+            border-width: 4px;
+        }
+        
+        .symbol.large {
+            width: 70px;
+            height: 70px;
+        }
+        
+        .symbol.small {
+            width: 30px;
+            height: 30px;
+        }
+        
+        /* 赤い視点マーカー（非表示） */
+        .focus-point {
+            display: none;
+        }
+        
+        /* 接続線 */
+        .connection-line {
+            position: absolute;
+            background: #a5d6a7;
+            transform-origin: left center;
+            z-index: 5;
+            transition: background 0.3s ease;
+        }
+        
+        /* 接続線はアクティブ時も色を変更しない */
+        
+        /* 下部の確認ボタン */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        
+        .confirm-btn {
+            background: #000000;
+            color: white;
+            border: none;
+            padding: 15px 60px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .confirm-btn:hover {
+            background: #333333;
+            transform: translateY(-1px);
+        }
+        
+        .confirm-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 開始画面 */
+        .start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #fff9c4 0%, #c8e6c9 50%, #bbdefb 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .start-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-content {
+            text-align: center;
+            position: relative;
+        }
+
+        .start-characters {
+            font-size: 50px;
+            margin-bottom: 15px;
+            animation: bounce 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-12px); }
+        }
+
+        .start-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.08);
+        }
+
+        .start-instruction {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            background: rgba(255, 255, 255, 0.75);
+            padding: 15px 30px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .countdown {
+            font-size: 80px;
+            font-weight: bold;
+            color: #e53935;
+            margin: 10px 0;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.12);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .start-deco {
+            position: absolute;
+            font-size: 36px;
+            opacity: 0.5;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(10deg); }
+        }
+
+        .start-deco-1 { top: -60px; left: -80px; animation-delay: 0s; }
+        .start-deco-2 { top: -60px; right: -80px; animation-delay: 0.5s; }
+        .start-deco-3 { bottom: -60px; left: -80px; animation-delay: 1s; }
+        .start-deco-4 { bottom: -60px; right: -80px; animation-delay: 1.5s; }
+        
+        /* トレーニング情報 */
+        .training-info {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 14px;
+            color: #999999;
+        }
+        
+        /* 進捗インジケーター */
+        .progress-indicator {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            transition: background 0.3s ease;
+        }
+        
+        .progress-dot.active {
+            background: #2e7d32;
+        }
+        
+        .progress-dot.completed {
+            background: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <button class="exit-btn" onclick="exitTraining()">終了</button>
+        <div class="header-title">視覚開発FMⅠ表</div>
+        <div class="timer" id="timer">03:00</div>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <div class="training-board" id="trainingBoard">
+            <div class="training-info" id="trainingInfo">
+                レベル2: 1秒間隔 / 5行水平移動
+            </div>
+            
+            <!-- 5行の水平移動パターン -->
+            <div class="horizontal-row" data-row="0">
+                <div class="symbol" data-position="0"></div>
+                <div class="symbol" data-position="1"></div>
+            </div>
+            
+            <div class="horizontal-row" data-row="1">
+                <div class="symbol" data-position="2"></div>
+                <div class="symbol" data-position="3"></div>
+            </div>
+            
+            <div class="horizontal-row" data-row="2">
+                <div class="symbol" data-position="4"></div>
+                <div class="symbol" data-position="5"></div>
+            </div>
+            
+            <div class="horizontal-row" data-row="3">
+                <div class="symbol" data-position="6"></div>
+                <div class="symbol" data-position="7"></div>
+            </div>
+            
+            <div class="horizontal-row" data-row="4">
+                <div class="symbol" data-position="8"></div>
+                <div class="symbol" data-position="9"></div>
+            </div>
+            
+            <!-- 赤い視点マーカー -->
+            <div class="focus-point hidden" id="focusPoint"></div>
+            
+            <!-- 進捗インジケーター -->
+            <div class="progress-indicator" id="progressIndicator">
+                <!-- 動的に生成 -->
+            </div>
+        </div>
+    </div>
+    
+    
+    <!-- 開始画面 -->
+    <div class="start-overlay" id="startOverlay">
+        <div class="start-content">
+            <span class="start-deco start-deco-1">⭐</span>
+            <span class="start-deco start-deco-2">🌟</span>
+            <span class="start-deco start-deco-3">✨</span>
+            <span class="start-deco start-deco-4">💫</span>
+            <div class="start-characters">👀➡️🐇</div>
+            <h1 class="start-title">水平移動トレーニング</h1>
+            <p class="start-instruction">
+                濃くなっている○印を目で追いかけてね！
+            </p>
+            <div class="countdown" id="countdown"></div>
+        </div>
+    </div>
+    
+    <script>
+        // トレーニング設定
+        const trainingConfig = {
+            level: 2, // デフォルトレベル2（1秒間隔）
+            totalPositions: 10,
+            currentPosition: 0,
+            timeLeft: 180, // 3分
+            isRunning: false,
+            speed: 1000 // 1秒間隔
+        };
+        
+        // 水平移動パターン（5行の左右移動）
+        const horizontalPattern = [
+            { row: 0, side: 'left' },   // 1行目左
+            { row: 0, side: 'right' },  // 1行目右
+            { row: 1, side: 'left' },   // 2行目左
+            { row: 1, side: 'right' },  // 2行目右
+            { row: 2, side: 'left' },   // 3行目左
+            { row: 2, side: 'right' },  // 3行目右
+            { row: 3, side: 'left' },   // 4行目左
+            { row: 3, side: 'right' },  // 4行目右
+            { row: 4, side: 'left' },   // 5行目左
+            { row: 4, side: 'right' }   // 5行目右
+        ];
+        
+        let timerInterval;
+        let patternInterval;
+        
+        // 初期化
+        function initialize() {
+            // URLパラメータから設定を読み込み
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('level')) {
+                trainingConfig.level = parseInt(params.get('level'));
+            }
+            
+            // レベルに応じた速度設定
+            const speeds = {
+                1: 2000,    // 2秒
+                2: 1000,    // 1秒
+                3: 500,     // 0.5秒
+                4: 250,     // 0.25秒
+                5: 100,     // 0.1秒
+                6: 0        // 同時表示
+            };
+            trainingConfig.speed = speeds[trainingConfig.level] || 1000;
+            
+            // 情報表示更新
+            updateTrainingInfo();
+            
+            // 接続線を生成
+            createConnectionLines();
+            
+            // 進捗インジケーター生成
+            createProgressIndicator();
+            
+            // カウントダウン開始
+            startCountdown();
+        }
+        
+        // 接続線生成
+        function createConnectionLines() {
+            const board = document.getElementById('trainingBoard');
+            const boardRect = board.getBoundingClientRect();
+            
+            // 各行の左右の円を結ぶ線を生成
+            for (let row = 0; row < 5; row++) {
+                const rowElement = document.querySelector(`[data-row="${row}"]`);
+                const leftSymbol = rowElement.querySelector('.symbol:first-child');
+                const rightSymbol = rowElement.querySelector('.symbol:last-child');
+                
+                if (leftSymbol && rightSymbol) {
+                    // 線の位置と角度を計算
+                    const leftRect = leftSymbol.getBoundingClientRect();
+                    const rightRect = rightSymbol.getBoundingClientRect();
+                    
+                    const startX = leftRect.left - boardRect.left + leftRect.width / 2;
+                    const startY = leftRect.top - boardRect.top + leftRect.height / 2;
+                    const endX = rightRect.left - boardRect.left + rightRect.width / 2;
+                    const endY = rightRect.top - boardRect.top + rightRect.height / 2;
+                    
+                    // 円の半径（25px）と隙間（約28px = 1cm）を考慮
+                    const circleRadius = 25;
+                    const gapDistance = 28;
+                    
+                    // 水平線なので計算が簡単
+                    const adjustedStartX = startX + circleRadius + gapDistance;
+                    const adjustedEndX = endX - circleRadius - gapDistance;
+                    const adjustedLength = adjustedEndX - adjustedStartX;
+                    
+                    // 線を作成
+                    const line = document.createElement('div');
+                    line.className = 'connection-line';
+                    line.dataset.row = row;
+                    
+                    line.style.left = `${adjustedStartX}px`;
+                    line.style.top = `${startY}px`;
+                    line.style.width = `${adjustedLength}px`;
+                    line.style.height = '2px';
+                    
+                    board.appendChild(line);
+                }
+            }
+        }
+        
+        // トレーニング情報更新
+        function updateTrainingInfo() {
+            const info = document.getElementById('trainingInfo');
+            const speedText = trainingConfig.level === 6 ? '同時表示' : `${trainingConfig.speed/1000}秒間隔`;
+            info.textContent = `レベル${trainingConfig.level}: ${speedText} / 5行水平移動`;
+        }
+        
+        // 進捗インジケーター生成
+        function createProgressIndicator() {
+            const indicator = document.getElementById('progressIndicator');
+            for (let i = 0; i < trainingConfig.totalPositions; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                dot.dataset.index = i;
+                indicator.appendChild(dot);
+            }
+        }
+        
+        // カウントダウン
+        function startCountdown() {
+            const overlay = document.getElementById('startOverlay');
+            const countdown = document.getElementById('countdown');
+            let count = 5;
+            
+            const updateCount = () => {
+                if (count > 0) {
+                    countdown.textContent = count;
+                    count--;
+                    setTimeout(updateCount, 1000);
+                } else {
+                    overlay.classList.add('hidden');
+                    startTraining();
+                }
+            };
+            
+            updateCount();
+        }
+        
+        // トレーニング開始
+        function startTraining() {
+            trainingConfig.isRunning = true;
+            
+            // タイマー開始
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            // パターン開始
+            showCurrentPosition();
+            if (trainingConfig.speed > 0) {
+                patternInterval = setInterval(nextPosition, trainingConfig.speed);
+            }
+        }
+        
+        // タイマー更新
+        function updateTimer() {
+            trainingConfig.timeLeft--;
+            
+            const minutes = Math.floor(trainingConfig.timeLeft / 60);
+            const seconds = trainingConfig.timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (trainingConfig.timeLeft <= 0) {
+                endTraining();
+            }
+        }
+        
+        // 現在位置表示
+        function showCurrentPosition() {
+            // 全ての記号を非アクティブに
+            document.querySelectorAll('.symbol').forEach(symbol => {
+                symbol.classList.remove('active');
+            });
+            
+            // 現在位置の記号をアクティブに
+            const pattern = horizontalPattern[trainingConfig.currentPosition % horizontalPattern.length];
+            const targetSymbol = document.querySelector(`[data-row="${pattern.row}"] .symbol:${pattern.side === 'left' ? 'first-child' : 'last-child'}`);
+            
+            if (targetSymbol) {
+                targetSymbol.classList.add('active');
+                
+                // 赤点は非表示のため削除
+            }
+            
+            // 進捗インジケーター更新
+            updateProgressIndicator();
+        }
+        
+        // 進捗インジケーター更新
+        function updateProgressIndicator() {
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, index) => {
+                if (index < trainingConfig.currentPosition) {
+                    dot.classList.add('completed');
+                    dot.classList.remove('active');
+                } else if (index === trainingConfig.currentPosition) {
+                    dot.classList.add('active');
+                    dot.classList.remove('completed');
+                } else {
+                    dot.classList.remove('active', 'completed');
+                }
+            });
+        }
+        
+        // 次の位置へ
+        function nextPosition() {
+            trainingConfig.currentPosition++;
+            if (trainingConfig.currentPosition >= trainingConfig.totalPositions) {
+                trainingConfig.currentPosition = 0;
+            }
+            showCurrentPosition();
+        }
+        
+        // 確認ボタン処理
+        function confirmView() {
+            if (!trainingConfig.isRunning) return;
+            
+            // 手動で次へ進む
+            nextPosition();
+            
+            // ボタンのフィードバック
+            const btn = document.getElementById('confirmBtn');
+            btn.style.background = '#333333';
+            setTimeout(() => {
+                btn.style.background = '#000000';
+            }, 100);
+        }
+        
+        // トレーニング終了
+        function endTraining() {
+            trainingConfig.isRunning = false;
+            clearInterval(timerInterval);
+            if (patternInterval) clearInterval(patternInterval);
+            
+            // クイズ画面へ遷移
+            window.location.href = `/quiz?training=horizontal&level=${trainingConfig.level}`;
+        }
+        
+        // 終了
+        function exitTraining() {
+            if (confirm('トレーニングを終了しますか？')) {
+                window.location.href = '/training-select';
+            }
+        }
+        
+        // キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                confirmView();
+            } else if (e.key === 'Escape') {
+                exitTraining();
+            }
+        });
+        
+        // 初期化実行
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>
