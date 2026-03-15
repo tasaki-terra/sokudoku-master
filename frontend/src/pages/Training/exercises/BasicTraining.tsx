@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, Button } from '@mui/material';
 import { TrainingHeader } from './TrainingHeader';
 import { CountdownOverlay } from './CountdownOverlay';
@@ -25,9 +25,9 @@ export const BasicTraining = ({ level, onComplete, onExit }: BasicTrainingProps)
   const [phase, setPhase] = useState<'countdown' | 'training'>('countdown');
   const [currentSymbol, setCurrentSymbol] = useState(0);
   const [currentDivision, setCurrentDivision] = useState(0);
+  const cycleCalledRef = useRef(false);
 
-  const handleTimeUp = useCallback(() => onComplete(), [onComplete]);
-  const { timeLeft, start } = useTrainingTimer(handleTimeUp);
+  const { timeLeft, start, stop } = useTrainingTimer(onComplete);
 
   const handleCountdownComplete = useCallback(() => {
     setPhase('training');
@@ -40,12 +40,20 @@ export const BasicTraining = ({ level, onComplete, onExit }: BasicTrainingProps)
     setCurrentDivision((prev) => {
       const next = prev + 1;
       if (next >= divisionsPerSymbol) {
-        setCurrentSymbol((s) => (s + 1) % TOTAL_SYMBOLS);
+        setCurrentSymbol((s) => {
+          const nextS = (s + 1) % TOTAL_SYMBOLS;
+          if (nextS === 0 && !cycleCalledRef.current) {
+            cycleCalledRef.current = true;
+            stop();
+            setTimeout(() => onComplete(), 0);
+          }
+          return nextS;
+        });
         return 0;
       }
       return next;
     });
-  }, [divisionsPerSymbol]);
+  }, [divisionsPerSymbol, stop, onComplete]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

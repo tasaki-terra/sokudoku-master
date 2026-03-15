@@ -1,20 +1,26 @@
 import { useState, useCallback } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import type { TrainingType } from '@/types';
+import type { TrainingType, QuizAnswer, GridCell } from '@/types';
 import { useStartTraining, useSaveTrainingResult } from '@/hooks/useTraining';
 import { TrainingSelect } from './Training/TrainingSelect';
 import { TrainingExecution } from './Training/TrainingExecution';
+import { TrainingQuiz } from './Training/TrainingQuiz';
 import { TrainingResult } from './Training/TrainingResult';
-import { calculateCompletionScore } from './Training/trainingLogic';
+import { calculateQuizScore } from './Training/trainingLogic';
 
-type Step = 'select' | 'execute' | 'result';
+type Step = 'select' | 'execute' | 'quiz' | 'result';
+
+/** Extract ordered special symbols from grid cells */
+const extractSpecialSymbols = (grid: GridCell[]): string[] =>
+  grid.filter((c) => c.isSpecial).map((c) => c.symbol);
 
 export const TrainingPage = () => {
   const [step, setStep] = useState<Step>('select');
   const [selectedType, setSelectedType] = useState<TrainingType>('horizontal');
   const [level, setLevel] = useState(1);
-  const [result, setResult] = useState({ score: 0, earnedPoints: 0 });
+  const [result, setResult] = useState({ score: 0, earnedPoints: 0, correctRate: 0 });
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [specialSymbols, setSpecialSymbols] = useState<string[]>([]);
 
   const startTrainingMutation = useStartTraining();
   const saveResultMutation = useSaveTrainingResult();
@@ -27,6 +33,7 @@ export const TrainingPage = () => {
         {
           onSuccess: (data) => {
             setSessionId(data.sessionId);
+            setSpecialSymbols(extractSpecialSymbols(data.grid));
             setStep('execute');
           },
         },
@@ -36,31 +43,43 @@ export const TrainingPage = () => {
   );
 
   const handleTrainingComplete = useCallback(() => {
-    const { score, earnedPoints } = calculateCompletionScore(level);
+    setStep('quiz');
+  }, []);
 
-    if (!sessionId) return;
+  const handleQuizComplete = useCallback(
+    (quizAnswers: QuizAnswer[]) => {
+      const { score, earnedPoints, correctRate } = calculateQuizScore(level, quizAnswers);
 
-    saveResultMutation.mutate(
-      {
-        sessionId,
-        type: selectedType,
-        level,
-        score,
-        correctRate: score,
-        earnedPoints,
-        quizAnswers: [],
-      },
-      {
-        onSuccess: (record) => {
-          setResult({ score: record.score, earnedPoints: record.earnedPoints });
-          setStep('result');
+      if (!sessionId) return;
+
+      saveResultMutation.mutate(
+        {
+          sessionId,
+          type: selectedType,
+          level,
+          score,
+          correctRate,
+          earnedPoints,
+          quizAnswers,
         },
-      },
-    );
-  }, [level, selectedType, sessionId, saveResultMutation]);
+        {
+          onSuccess: (record) => {
+            setResult({
+              score: record.score,
+              earnedPoints: record.earnedPoints,
+              correctRate: record.correctRate,
+            });
+            setStep('result');
+          },
+        },
+      );
+    },
+    [level, selectedType, sessionId, saveResultMutation],
+  );
 
   const handleRetry = useCallback(() => {
     setSessionId(null);
+    setSpecialSymbols([]);
     setStep('select');
   }, []);
 
@@ -85,10 +104,14 @@ export const TrainingPage = () => {
       {!isLoading && step === 'execute' && (
         <TrainingExecution type={selectedType} level={level} onComplete={handleTrainingComplete} />
       )}
+      {!isLoading && step === 'quiz' && (
+        <TrainingQuiz specialSymbols={specialSymbols} onComplete={handleQuizComplete} />
+      )}
       {!isLoading && step === 'result' && (
         <TrainingResult
           score={result.score}
           earnedPoints={result.earnedPoints}
+          correctRate={result.correctRate}
           type={selectedType}
           onRetry={handleRetry}
         />

@@ -11,6 +11,7 @@ import { useBestScores } from '@/hooks/useProgress';
 interface TrainingResultProps {
   score: number;
   earnedPoints: number;
+  correctRate?: number;
   type: TrainingType;
   onRetry: () => void;
 }
@@ -18,6 +19,7 @@ interface TrainingResultProps {
 export const TrainingResult = ({
   score,
   earnedPoints,
+  correctRate,
   type,
   onRetry,
 }: TrainingResultProps) => {
@@ -44,6 +46,13 @@ export const TrainingResult = ({
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             スコア
           </Typography>
+
+          {correctRate != null && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="h3">{correctRate}%</Typography>
+              <Typography variant="body2" color="text.secondary">正答率</Typography>
+            </Box>
+          )}
 
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <Box>

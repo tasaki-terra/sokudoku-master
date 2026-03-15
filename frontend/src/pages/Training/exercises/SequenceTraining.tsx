@@ -27,9 +27,16 @@ export const SequenceTraining = ({ level, onComplete, onExit }: SequenceTraining
   const [phase, setPhase] = useState<'countdown' | 'training'>('countdown');
   const speed = getLevelSpeed(level);
 
-  const handleTimeUp = useCallback(() => onComplete(), [onComplete]);
-  const { timeLeft, start } = useTrainingTimer(handleTimeUp);
-  const { currentPosition } = useAutoAdvance(TOTAL_POSITIONS, speed, phase === 'training');
+  const { timeLeft, start, stop } = useTrainingTimer(onComplete);
+
+  const handleCycleComplete = useCallback(() => {
+    stop();
+    onComplete();
+  }, [stop, onComplete]);
+
+  const { currentPosition } = useAutoAdvance(
+    TOTAL_POSITIONS, speed, phase === 'training', handleCycleComplete,
+  );
 
   const handleCountdownComplete = useCallback(() => {
     setPhase('training');

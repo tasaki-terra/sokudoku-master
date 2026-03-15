@@ -23,20 +23,32 @@ export const useAutoAdvance = (
   totalPositions: number,
   speed: number,
   isRunning: boolean,
+  onCycleComplete?: () => void,
 ): UseAutoAdvanceReturn => {
   const [currentPosition, setCurrentPosition] = useState(0);
   const rafRef = useRef(0);
   const startTimeRef = useRef(0);
   const lastAdvanceRef = useRef(0);
+  const onCycleCompleteRef = useRef(onCycleComplete);
+  onCycleCompleteRef.current = onCycleComplete;
+  const cycleCalledRef = useRef(false);
 
   const advance = useCallback(() => {
-    setCurrentPosition((prev) => (prev + 1) % totalPositions);
+    setCurrentPosition((prev) => {
+      const next = (prev + 1) % totalPositions;
+      if (next === 0 && !cycleCalledRef.current) {
+        cycleCalledRef.current = true;
+        setTimeout(() => onCycleCompleteRef.current?.(), 0);
+      }
+      return next;
+    });
   }, [totalPositions]);
 
   const reset = useCallback(() => {
     setCurrentPosition(0);
     startTimeRef.current = 0;
     lastAdvanceRef.current = 0;
+    cycleCalledRef.current = false;
   }, []);
 
   useEffect(() => {
