@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TrainingSession {
+  id           String   @id @default(cuid())
+  type         String
+  level        Int
+  gridSize     Int
+  intervalMs   Int
+  grid         Json
+  displayOrder Json
+  createdAt    DateTime @default(now())
+
+  result TrainingResult?
+
+  @@map("training_sessions")
+}
+
+model TrainingResult {
+  id           String   @id @default(cuid())
+  sessionId    String   @unique
+  type         String
+  level        Int
+  score        Int
+  correctRate  Float
+  earnedPoints Int
+  quizAnswers  Json
+  createdAt    DateTime @default(now())
+
+  session TrainingSession @relation(fields: [sessionId], references: [id])
+
+  @@index([type])
+  @@index([createdAt])
+  @@map("training_results")
+}
