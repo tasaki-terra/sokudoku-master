@@ -10,7 +10,6 @@ import { useProgressStore } from '@/stores/useProgressStore';
 
 interface TrainingResultProps {
   score: number;
-  correctRate: number;
   earnedPoints: number;
   type: TrainingType;
   onRetry: () => void;
@@ -18,7 +17,6 @@ interface TrainingResultProps {
 
 export const TrainingResult = ({
   score,
-  correctRate,
   earnedPoints,
   type,
   onRetry,
@@ -47,11 +45,7 @@ export const TrainingResult = ({
             スコア
           </Typography>
 
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mb: 2 }}>
-            <Box>
-              <Typography variant="h3">{correctRate}%</Typography>
-              <Typography variant="body2" color="text.secondary">正答率</Typography>
-            </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <Box>
               <Typography variant="h3">+{earnedPoints}pt</Typography>
               <Typography variant="body2" color="text.secondary">獲得ポイント</Typography>

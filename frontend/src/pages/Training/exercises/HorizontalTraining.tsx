@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Box } from '@mui/material';
+import { LazyMotion, domAnimation } from 'framer-motion';
 import { TrainingHeader } from './TrainingHeader';
 import { CountdownOverlay } from './CountdownOverlay';
 import { TrainingBoard, TrainingLayout } from './TrainingBoard';
@@ -17,12 +18,11 @@ const ROWS = 5;
 const POSITIONS_PER_ROW = 2;
 const TOTAL_POSITIONS = ROWS * POSITIONS_PER_ROW;
 
-export const HorizontalTraining = ({ level, onComplete, onExit }: HorizontalTrainingProps) => {
+export const HorizontalTraining = ({ level, onComplete }: HorizontalTrainingProps) => {
   const [phase, setPhase] = useState<'countdown' | 'training'>('countdown');
   const speed = getLevelSpeed(level);
 
-  const handleTimeUp = useCallback(() => onComplete(), [onComplete]);
-  const { timeLeft, start } = useTrainingTimer(handleTimeUp);
+  const { timeLeft, start } = useTrainingTimer(onComplete);
   const { currentPosition } = useAutoAdvance(TOTAL_POSITIONS, speed, phase === 'training');
 
   const handleCountdownComplete = useCallback(() => {
@@ -33,7 +33,7 @@ export const HorizontalTraining = ({ level, onComplete, onExit }: HorizontalTrai
   const speedText = level === 6 ? '同時表示' : `${speed / 1000}秒間隔`;
 
   return (
-    <>
+    <LazyMotion features={domAnimation}>
       {phase === 'countdown' && (
         <CountdownOverlay
           title="水平移動トレーニング"
@@ -42,35 +42,46 @@ export const HorizontalTraining = ({ level, onComplete, onExit }: HorizontalTrai
           onComplete={handleCountdownComplete}
         />
       )}
-      <TrainingHeader title="視覚開発FMI表" timeLeft={timeLeft} onExit={onExit} />
+      <TrainingHeader title="視覚開発FMI表" timeLeft={timeLeft} onExit={onComplete} />
       <TrainingLayout>
         <TrainingBoard info={`レベル${level}: ${speedText} / 5行水平移動`}>
-          {Array.from({ length: ROWS }, (_, row) => {
-            const leftIndex = row * POSITIONS_PER_ROW;
-            const rightIndex = leftIndex + 1;
-            const leftActive = currentPosition === leftIndex;
-            const rightActive = currentPosition === rightIndex;
-            return (
-              <Box
-                key={row}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  my: '30px',
-                  position: 'relative',
-                }}
-              >
-                <CircleSymbol active={leftActive} />
-                <ConnectionLine />
-                <CircleSymbol active={rightActive} />
-              </Box>
-            );
-          })}
+          {Array.from({ length: ROWS }, (_, row) => (
+            <HorizontalRow
+              key={row}
+              row={row}
+              currentPosition={currentPosition}
+            />
+          ))}
           <ProgressDots total={TOTAL_POSITIONS} current={currentPosition} />
         </TrainingBoard>
       </TrainingLayout>
-    </>
+    </LazyMotion>
+  );
+};
+
+interface HorizontalRowProps {
+  row: number;
+  currentPosition: number;
+}
+
+const HorizontalRow = ({ row, currentPosition }: HorizontalRowProps) => {
+  const leftIndex = row * POSITIONS_PER_ROW;
+  const rightIndex = leftIndex + 1;
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        my: '30px',
+        position: 'relative',
+      }}
+    >
+      <CircleSymbol active={currentPosition === leftIndex} />
+      <ConnectionLine />
+      <CircleSymbol active={currentPosition === rightIndex} />
+    </Box>
   );
 };
 
