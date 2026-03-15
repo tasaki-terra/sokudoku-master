@@ -1,26 +1,28 @@
-import { useMemo } from 'react';
-import { Box, Typography } from '@mui/material';
-import { useProgressStore } from '@/stores/useProgressStore';
-import type { TrainingRecord } from '@/types';
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
+import { useTrainingRecords } from '@/hooks/useRecords';
 import { StatsSummary } from './Records/StatsSummary';
 import { ScoreChart } from './Records/ScoreChart';
 import { TrainingHistory } from './Records/TrainingHistory';
 
-const STORAGE_KEY = 'sokudoku-records';
-
-const loadRecords = (): TrainingRecord[] => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as TrainingRecord[];
-  } catch {
-    return [];
-  }
-};
-
 export const RecordsPage = () => {
-  const { totalPoints, currentLevel, totalTrainings } = useProgressStore();
-  const records = useMemo(loadRecords, []);
+  const { data, isLoading, error } = useTrainingRecords();
+  const records = data?.records ?? [];
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ px: 2, py: 4 }}>
+        <Alert severity="error">記録の読み込みに失敗しました</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -28,12 +30,7 @@ export const RecordsPage = () => {
         きろく
       </Typography>
 
-      <StatsSummary
-        totalTrainings={totalTrainings}
-        currentLevel={currentLevel}
-        totalPoints={totalPoints}
-        records={records}
-      />
+      <StatsSummary />
 
       <ScoreChart records={records} />
 

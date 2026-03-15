@@ -1,35 +1,31 @@
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography, CircularProgress } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import StarIcon from '@mui/icons-material/Star';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { motion } from 'framer-motion';
-import type { TrainingRecord } from '@/types';
+import { useRecordStats } from '@/hooks/useProgress';
 
-interface StatsSummaryProps {
-  totalTrainings: number;
-  currentLevel: number;
-  totalPoints: number;
-  records: TrainingRecord[];
-}
+export const StatsSummary = () => {
+  const { data, isLoading } = useRecordStats();
 
-const calcAverageRate = (records: TrainingRecord[]): string => {
-  if (records.length === 0) return '---';
-  const avg = records.reduce((sum, r) => sum + r.correctRate, 0) / records.length;
-  return `${Math.round(avg)}%`;
-};
+  if (isLoading || !data) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress size={32} />
+      </Box>
+    );
+  }
 
-export const StatsSummary = ({
-  totalTrainings,
-  currentLevel,
-  totalPoints,
-  records,
-}: StatsSummaryProps) => {
+  const averageRate = data.averageCorrectRate != null
+    ? `${Math.round(data.averageCorrectRate)}%`
+    : '---';
+
   const stats = [
-    { label: 'トレーニング回数', value: `${totalTrainings}回`, icon: <SchoolIcon />, color: '#D4740E' },
-    { label: '現在のレベル', value: `Lv.${currentLevel}`, icon: <StarIcon />, color: '#FFB300' },
-    { label: '累計ポイント', value: `${totalPoints}pt`, icon: <EmojiEventsIcon />, color: '#4CAF50' },
-    { label: '平均正答率', value: calcAverageRate(records), icon: <CheckCircleIcon />, color: '#5C6BC0' },
+    { label: 'トレーニング回数', value: `${data.totalTrainings}回`, icon: <SchoolIcon />, color: '#D4740E' },
+    { label: '現在のレベル', value: `Lv.${data.currentLevel}`, icon: <StarIcon />, color: '#FFB300' },
+    { label: '累計ポイント', value: `${data.totalPoints}pt`, icon: <EmojiEventsIcon />, color: '#4CAF50' },
+    { label: '平均正答率', value: averageRate, icon: <CheckCircleIcon />, color: '#5C6BC0' },
   ];
 
   return (

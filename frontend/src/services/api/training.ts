@@ -7,63 +7,33 @@ import type {
   TrainingRecordListResponse,
   UserProgress,
 } from '../../types';
+import { API_PATHS } from '../../types';
+import { get, post } from './client';
 
-/**
- * @API_INTEGRATION
- * エンドポイント: POST /api/training/start
- * リクエスト: StartTrainingRequest
- * レスポンス: StartTrainingResponse
- * 認証: 必要
- */
-export const startTraining = async (_data: StartTrainingRequest): Promise<StartTrainingResponse> => {
-  // TODO: Phase 8でAPI接続実装
-  throw new Error('API not implemented');
+export const startTraining = async (data: StartTrainingRequest): Promise<StartTrainingResponse> => {
+  return post<StartTrainingResponse>(API_PATHS.TRAINING.START, data);
 };
 
-/**
- * @API_INTEGRATION
- * エンドポイント: POST /api/training/result
- * リクエスト: SaveTrainingResultRequest
- * レスポンス: TrainingRecord
- * 認証: 必要
- */
-export const saveTrainingResult = async (_data: SaveTrainingResultRequest): Promise<TrainingRecord> => {
-  // TODO: Phase 8でAPI接続実装
-  throw new Error('API not implemented');
+export const saveTrainingResult = async (data: SaveTrainingResultRequest): Promise<TrainingRecord> => {
+  return post<TrainingRecord>(API_PATHS.TRAINING.SAVE_RESULT, data);
 };
 
-/**
- * @API_INTEGRATION
- * エンドポイント: GET /api/training/records
- * リクエスト: TrainingRecordListRequest（クエリパラメータ）
- * レスポンス: TrainingRecordListResponse
- * 認証: 必要
- */
 export const getTrainingRecords = async (
-  _params?: TrainingRecordListRequest,
+  params?: TrainingRecordListRequest,
 ): Promise<TrainingRecordListResponse> => {
-  // TODO: Phase 8でAPI接続実装
-  throw new Error('API not implemented');
+  const query = new URLSearchParams();
+  if (params?.type) query.set('type', params.type);
+  if (params?.page != null) query.set('page', String(params.page));
+  if (params?.limit != null) query.set('limit', String(params.limit));
+  const qs = query.toString();
+  const path = qs ? `${API_PATHS.TRAINING.LIST}?${qs}` : API_PATHS.TRAINING.LIST;
+  return get<TrainingRecordListResponse>(path);
 };
 
-/**
- * @API_INTEGRATION
- * エンドポイント: GET /api/training/records/:id
- * レスポンス: TrainingRecord
- * 認証: 必要
- */
-export const getTrainingRecord = async (_id: string): Promise<TrainingRecord> => {
-  // TODO: Phase 8でAPI接続実装
-  throw new Error('API not implemented');
+export const getTrainingRecord = async (id: string): Promise<TrainingRecord> => {
+  return get<TrainingRecord>(API_PATHS.TRAINING.DETAIL(id));
 };
 
-/**
- * @API_INTEGRATION
- * エンドポイント: GET /api/progress
- * レスポンス: UserProgress
- * 認証: 必要
- */
 export const getUserProgress = async (): Promise<UserProgress> => {
-  // TODO: Phase 8でAPI接続実装
-  throw new Error('API not implemented');
+  return get<UserProgress>(API_PATHS.PROGRESS.GET);
 };

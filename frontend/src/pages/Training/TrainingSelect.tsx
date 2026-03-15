@@ -7,7 +7,7 @@ import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import FastForwardIcon from '@mui/icons-material/FastForward';
 import type { TrainingType } from '@/types';
 import { TRAINING_TYPE_LABELS } from '@/types';
-import { useProgressStore } from '@/stores/useProgressStore';
+import { useBestScores } from '@/hooks/useProgress';
 
 const TRAINING_CARDS: { type: TrainingType; icon: React.ReactNode; description: string }[] = [
   { type: 'horizontal', icon: <SwapHorizIcon fontSize="large" />, description: '左右に視線を素早く動かす' },
@@ -34,7 +34,7 @@ interface TrainingSelectProps {
 }
 
 export const TrainingSelect = ({ level, onLevelChange, onSelect }: TrainingSelectProps) => {
-  const { bestScores } = useProgressStore();
+  const { data: bestScores } = useBestScores();
 
   return (
     <Box>
@@ -73,7 +73,7 @@ export const TrainingSelect = ({ level, onLevelChange, onSelect }: TrainingSelec
                   <Typography variant="body2" color="text.secondary">
                     {card.description}
                   </Typography>
-                  {bestScores[card.type] > 0 && (
+                  {bestScores && bestScores[card.type] > 0 && (
                     <Typography
                       variant="caption"
                       sx={{ display: 'block', mt: 1, color: 'primary.main', fontWeight: 700 }}

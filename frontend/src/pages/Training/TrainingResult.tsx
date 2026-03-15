@@ -6,7 +6,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useNavigate } from 'react-router-dom';
 import type { TrainingType } from '@/types';
-import { useProgressStore } from '@/stores/useProgressStore';
+import { useBestScores } from '@/hooks/useProgress';
 
 interface TrainingResultProps {
   score: number;
@@ -22,8 +22,8 @@ export const TrainingResult = ({
   onRetry,
 }: TrainingResultProps) => {
   const navigate = useNavigate();
-  const { bestScores } = useProgressStore();
-  const previousBest = bestScores[type];
+  const { data: bestScores } = useBestScores();
+  const previousBest = bestScores?.[type] ?? 0;
   const diff = score - previousBest;
 
   return (
